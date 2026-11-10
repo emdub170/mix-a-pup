@@ -1,0 +1,1205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Mix breeds, fill the Pupdex, train your pups, and send them to dog shows.">
+<meta name="theme-color" content="#ECEEF8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#15172C" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mix-a-Pup">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Mix-a-Pup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: one phone-width column; sticky status + tabs on top, action tray pinned to the bottom like a game HUD. */
+:root{
+  --bg:#ECEEF8; --surface:#FFFFFF; --surface-2:#E1E5F4; --ink:#23264A; --muted:#62668C; --line:#D3D8EB;
+  --accent:#D3EE45; --accent-ink:#22264A; --select:#5357D4; --rare:#B44FCF; --new:#F2683A; --good:#2E9E6A;
+  --pup-shadow:rgba(35,38,74,.13); --sil:brightness(0) opacity(.16); --alb:#F7DCE3; --alb-ink:#8E2F4C;
+  --font-display:'Baloo 2','Trebuchet MS',system-ui,sans-serif;
+  --font-body:'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#15172C; --surface:#212443; --surface-2:#2A2E55; --ink:#ECEEFF; --muted:#A4A8CE; --line:#373B66;
+  --accent:#D3EE45; --accent-ink:#1A1C33; --select:#9296FF; --rare:#E08BF2; --new:#FF8E62; --good:#5FD39C;
+  --pup-shadow:rgba(0,0,0,.35); --sil:brightness(0) invert(1) opacity(.13); --alb:#5A2A3A; --alb-ink:#F7C9D6; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#15172C; --surface:#212443; --surface-2:#2A2E55; --ink:#ECEEFF; --muted:#A4A8CE; --line:#373B66;
+  --accent:#D3EE45; --accent-ink:#1A1C33; --select:#9296FF; --rare:#E08BF2; --new:#FF8E62; --good:#5FD39C;
+  --pup-shadow:rgba(0,0,0,.35); --sil:brightness(0) invert(1) opacity(.13); --alb:#5A2A3A; --alb-ink:#F7C9D6; color-scheme:dark }
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.4;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--select);outline-offset:2px}
+.app{max-width:520px;margin:0 auto;padding-bottom:170px}
+h1,h2,h3{font-family:var(--font-display);margin:0;line-height:1.1;text-wrap:balance}
+
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:12px 10px;display:grid;gap:10px}
+.brand{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand h1{font-size:28px;font-weight:800;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+.brand h1 .ball{width:22px;height:22px;flex:none}
+.ghost{background:none;border:1.5px solid var(--line);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:700;color:var(--muted)}
+.status{display:flex;gap:8px;flex-wrap:wrap}
+.chip{display:flex;align-items:center;gap:6px;background:var(--surface);border-radius:999px;padding:5px 11px 5px 8px;font-weight:800;font-variant-numeric:tabular-nums}
+.chip svg{width:18px;height:18px;flex:none}
+.chip small{font-weight:700;color:var(--muted);font-size:12px}
+.chip .adbtn{border:none;background:var(--surface-2);border-radius:999px;font-size:12px;font-weight:800;padding:2px 8px;margin-left:2px}
+.tabs{display:grid;grid-template-columns:repeat(6,1fr);background:var(--surface);border-radius:14px;padding:4px;gap:3px}
+.tabs button{border:none;background:none;border-radius:10px;padding:8px 1px;font-weight:800;font-size:12.5px;color:var(--muted);position:relative}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--bg)}
+.tabs .dot{position:absolute;top:4px;right:6px;width:8px;height:8px;border-radius:50%;background:var(--new)}
+
+.sectionhead{display:flex;justify-content:space-between;align-items:baseline;margin-block:8px 10px;gap:12px}
+.sectionhead h2{font-size:20px}
+.sectionhead span{font-size:13px;color:var(--muted);font-weight:700;font-variant-numeric:tabular-nums}
+
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.pupcard{position:relative;background:var(--surface);border:2.5px solid transparent;border-radius:18px;padding:6px 6px 10px;text-align:center;display:flex;flex-direction:column;gap:2px;min-width:0}
+.pupcard[aria-pressed="true"]{border-color:var(--select)}
+.pupcard.away .art{opacity:.45}
+.pupcard .art{aspect-ratio:1;max-width:100%;border-radius:14px;background:radial-gradient(circle at 50% 78%,var(--surface-2) 0 46%,transparent 47%)}
+.pupcard .art svg{width:100%;height:100%;display:block}
+.art,.mini{position:relative}
+.pins{position:absolute;right:0;bottom:0;width:66%;display:flex;flex-direction:row-reverse}
+.pin{width:40%;margin-left:-10%;filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.3))}
+.pin svg{width:100%;height:auto;display:block}
+.rcase{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.rc{background:var(--surface-2);border-radius:12px;padding:6px 4px;text-align:center;min-width:0}
+.rc svg{width:72%;height:auto;display:block;margin:0 auto}
+.rc b{display:block;font-size:11.5px}
+.rc small{display:block;font-size:11px;color:var(--muted);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rkrow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.rk{background:var(--surface);border-radius:14px;padding:8px 6px;text-align:center}
+.rk svg{width:52%;height:auto;display:block;margin:0 auto}
+.rk small{display:block;font-weight:800;font-size:12.5px;margin-top:2px}
+.shopgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.item{background:var(--surface);border-radius:16px;padding:6px 6px 8px;display:flex;flex-direction:column;gap:3px;text-align:center;min-width:0}
+.item .art{aspect-ratio:1;border-radius:12px;background:radial-gradient(circle at 50% 78%,var(--surface-2) 0 46%,transparent 47%)}
+.item .art svg{width:100%;height:100%;display:block}
+.item b{font-size:13px;line-height:1.2;text-wrap:balance}
+.item span.k{font-size:11.5px;color:var(--muted);font-weight:700}
+.item .btn{margin-top:auto;padding:8px 4px;font-size:13.5px;border-radius:11px}
+.wprev{width:150px;height:150px;margin:0 auto}
+.wprev svg{width:100%;height:100%;display:block}
+.wchips{display:flex;flex-wrap:wrap;gap:6px}
+.wchip{border:2px solid transparent;background:var(--surface-2);border-radius:999px;padding:6px 12px;font-weight:800;font-size:13.5px}
+.wchip[aria-pressed="true"]{border-color:var(--select);background:var(--surface)}
+.ptabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.ptabs button{border:2px solid transparent;background:var(--surface-2);border-radius:12px;padding:8px;font-weight:800}
+.ptabs button[aria-selected="true"]{border-color:var(--select);background:var(--surface)}
+.evtbl{display:grid;grid-template-columns:1.4fr .8fr .8fr 1fr;gap:6px 8px;font-size:13.5px;font-weight:700;font-variant-numeric:tabular-nums}
+.evtbl .h{color:var(--muted);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase}
+.hist{display:grid;gap:8px}
+.hrow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;background:var(--surface-2);border-radius:12px;padding:9px 11px}
+.hrow i{width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.2);display:block}
+.hrow b{font-size:14px;display:block}
+.hrow small{display:block;color:var(--muted);font-size:12px;font-weight:600}
+.hrow .amt{font-weight:800;font-variant-numeric:tabular-nums;text-align:right}
+.pupcard .nm{font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pupcard .br{font-size:11.5px;color:var(--muted);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.selnum{position:absolute;top:6px;left:6px;width:22px;height:22px;border-radius:50%;background:var(--select);color:var(--bg);font-weight:800;font-size:13px;display:grid;place-items:center}
+.badge{position:absolute;top:6px;right:6px;font-size:10.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;border-radius:999px;padding:2px 7px;font-variant-numeric:tabular-nums}
+.b-rare{background:var(--rare);color:var(--bg)}
+.b-des{background:var(--accent);color:var(--accent-ink)}
+.b-mutt{background:var(--surface-2);color:var(--ink)}
+.b-alb{background:var(--alb);color:var(--alb-ink)}
+.b-train{background:var(--ink);color:var(--bg)}
+.b-res{background:var(--new);color:#fff}
+.ribs{display:flex;gap:6px;justify-content:center;min-height:15px;font-size:11.5px;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}
+.ribs span{display:inline-flex;align-items:center;gap:3px}
+.ribs i{width:9px;height:9px;border-radius:50%;display:inline-block;border:1px solid rgba(0,0,0,.18)}
+.addcard{background:none;border:2.5px dashed var(--line);border-radius:18px;color:var(--muted);font-weight:800;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:150px;padding:10px}
+.addcard .big{font-family:var(--font-display);font-size:30px;line-height:1;color:var(--ink)}
+.addcard:disabled{opacity:.55;cursor:default}
+.cost{display:inline-flex;align-items:center;gap:4px;font-weight:800;font-variant-numeric:tabular-nums}
+.cost svg{width:15px;height:15px}
+
+.tray{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1.5px solid var(--line);
+  padding-top:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.trayin{max-width:520px;margin:0 auto;display:grid;gap:10px}
+.trayline{display:flex;align-items:center;gap:10px;min-height:40px}
+.trayline .mini{width:44px;height:44px;flex:none}
+.trayline .txt{min-width:0;flex:1}
+.trayline .txt b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trayline .txt span{font-size:13px;color:var(--muted);font-weight:700}
+.iconbtn{border:none;background:var(--surface-2);border-radius:12px;width:40px;height:40px;display:grid;place-items:center;flex:none;color:var(--ink)}
+.iconbtn svg{width:20px;height:20px}
+.btnrow{display:flex;gap:8px}
+.btn{flex:1;border:none;border-radius:14px;padding:12px 8px;font-weight:800;font-size:15px;display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--surface-2)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);font-family:var(--font-display);font-size:18px;padding-block:9px}
+.btn.link{background:none;flex:none;padding:4px 8px;color:var(--select);font-size:14px;text-decoration:underline;text-underline-offset:3px;justify-self:center}
+.btn:disabled{opacity:.45;cursor:default}
+.btn svg{width:18px;height:18px}
+
+.stats{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:6px 10px;align-items:center;font-weight:800;font-size:13px;font-variant-numeric:tabular-nums}
+.stats .lbl{color:var(--muted)}
+.stats .sb{height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden}
+.stats .sb i{display:block;height:100%;background:var(--good);border-radius:99px}
+.stats .w{color:var(--muted);font-weight:700;font-size:11.5px;margin-left:4px}
+.statline{font-size:12.5px;color:var(--muted);font-weight:700;font-variant-numeric:tabular-nums}
+
+.dexhead{background:var(--surface);border-radius:20px;padding:12px;display:flex;gap:12px;align-items:center;margin-bottom:12px}
+.dexhead .big{width:120px;height:120px;flex:none}
+.dexhead .info{min-width:0;display:grid;gap:4px}
+.reg{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-variant-numeric:tabular-nums}
+.dexhead h3{font-size:22px}
+.dexhead p{margin:0;font-size:14px;color:var(--muted)}
+.bar{height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--select);border-radius:99px}
+.dexgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:16px}
+.dexcell{background:var(--surface);border:2px solid transparent;border-radius:14px;padding:4px 4px 6px;text-align:center;min-width:0}
+.dexcell[aria-pressed="true"]{border-color:var(--select)}
+.dexcell svg{width:100%;aspect-ratio:1;display:block}
+.dexcell .no{font-size:10px;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}
+.dexcell .nm{font-size:11px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sil svg{filter:var(--sil)}
+
+.shop{display:grid;gap:10px}
+.offer{background:var(--surface);border-radius:18px;padding:10px;display:flex;align-items:center;gap:12px}
+.offer .art{width:80px;height:80px;flex:none}
+.offer .txt{flex:1;min-width:0;display:grid;gap:2px}
+.offer .txt b{display:block;font-size:16px}
+.offer .txt span{font-size:13px;color:var(--muted)}
+.offer .btn{flex:none;padding-inline:14px}
+.note{font-size:13px;color:var(--muted);margin:6px 0 14px}
+
+.slot{background:var(--surface);border-radius:18px;padding:12px;display:flex;align-items:center;gap:12px}
+.slot .art{width:72px;height:72px;flex:none}
+.slot .txt{flex:1;min-width:0;display:grid;gap:6px}
+.slot .btn{flex:none;padding-inline:14px}
+.slot.empty{background:none;border:2.5px dashed var(--line);color:var(--muted);font-weight:700;font-size:14px;min-height:96px}
+.evcard{background:var(--surface);border-radius:18px;padding:12px 14px;display:grid;gap:4px}
+.evcard b{font-family:var(--font-display);font-size:18px}
+.evcard p{margin:0;font-size:13.5px;color:var(--muted)}
+.tierrow{display:grid;grid-template-columns:1.1fr 1fr 1fr .8fr;gap:6px;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;padding:8px 2px;border-bottom:1px solid var(--line)}
+.tierrow.h{color:var(--muted);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase}
+.ribkey{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;font-weight:700;color:var(--muted)}
+.ribkey span{display:inline-flex;align-items:center;gap:5px}
+.ribkey i{width:12px;height:12px;border-radius:50%;border:1px solid rgba(0,0,0,.2)}
+
+.overlay{position:fixed;inset:0;z-index:20;background:rgba(15,16,34,.55);display:grid;place-items:end center;
+  padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+.sheet{width:100%;max-width:440px;background:var(--surface);border-radius:26px;padding:18px;display:grid;gap:12px;max-height:88vh;overflow:auto}
+.sheet h2{font-size:28px;text-align:center}
+.sheet h3{font-size:16px}
+.sheet .sub{text-align:center;color:var(--muted);font-weight:700;margin-top:-6px}
+.sheet form{display:grid;gap:12px}
+.sheethead{display:flex;align-items:center;gap:12px}
+.sheethead .mini{width:64px;height:64px;flex:none}
+.sheethead h2{text-align:left;font-size:24px}
+.sheethead .sub{text-align:left;margin:0}
+.tags{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.tag{font-size:11.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;border-radius:999px;padding:3px 9px}
+.t-new{background:var(--new);color:#fff}
+.field{display:grid;gap:4px}
+.field label,.lab{font-size:13px;font-weight:800;color:var(--muted)}
+.field input{font:inherit;font-size:16px;font-weight:700;padding:10px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);width:100%}
+.field textarea{font:12px ui-monospace,Consolas,monospace;padding:10px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);width:100%;resize:vertical;word-break:break-all}
+.field textarea:focus-visible{outline:3px solid var(--select);outline-offset:2px}
+.setrow{display:flex;justify-content:space-between;gap:12px;align-items:center;background:var(--surface-2);border-radius:14px;padding:10px 12px;font-weight:800}
+.setrow small{display:block;font-weight:600;color:var(--muted);font-size:12.5px}
+.setrow input{width:22px;height:22px;accent-color:var(--select);flex:none}
+.setrow.off{opacity:.5}
+.seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.seg button{border:2px solid transparent;background:var(--surface-2);border-radius:12px;padding:8px 4px;font-weight:800;font-size:13.5px;display:grid;gap:1px}
+.seg button small{font-weight:700;font-size:11px;color:var(--muted)}
+.seg button[aria-pressed="true"]{border-color:var(--select);background:var(--surface)}
+.seg button:disabled{opacity:.45;cursor:default}
+.choices{display:grid;gap:8px}
+.choice{border:none;background:var(--surface-2);border-radius:14px;padding:12px 14px;text-align:left;display:grid;gap:2px}
+.choice b{font-size:16px}
+.choice span{font-size:13px;color:var(--muted);font-weight:700}
+.summary{display:grid;grid-template-columns:1fr auto;gap:6px 12px;font-size:14px;font-variant-numeric:tabular-nums;margin:0;background:var(--surface-2);border-radius:14px;padding:12px}
+.summary dt{color:var(--muted);font-weight:700}
+.summary dd{margin:0;font-weight:800;text-align:right}
+.outlook{display:inline-block;font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;border-radius:999px;padding:2px 9px;color:#fff}
+.stage{position:relative;height:190px}
+.stage .par{position:absolute;top:34px;width:118px}
+.stage .pa{left:calc(50% - 146px);animation:inL .8s ease-in forwards}
+.stage .pb{right:calc(50% - 146px);animation:inR .8s ease-in forwards}
+.stage .poof{position:absolute;left:50%;top:50%;width:40px;height:40px;margin:-20px 0 0 -20px;border-radius:50%;background:var(--accent);opacity:0;animation:poof .6s .65s ease-out forwards}
+.stage .res{position:absolute;left:50%;top:0;width:180px;margin-left:-90px;transform:scale(0);animation:pop .5s .85s cubic-bezier(.3,1.6,.5,1) forwards}
+.resinfo{display:grid;gap:12px;opacity:0;animation:fade .35s 1.15s forwards}
+.showres{display:flex;align-items:center;justify-content:center;gap:4px;height:150px}
+.showres .pupart{width:130px;height:130px}
+.showres .ros{width:84px;height:100px;animation:pop2 .5s .2s cubic-bezier(.3,1.6,.5,1) both}
+.flair{font-size:15px;font-weight:700;text-align:center;margin:0;text-wrap:balance}
+.purse{font-family:var(--font-display);font-size:30px;text-align:center;line-height:1}
+@keyframes pop2{from{transform:scale(0) rotate(-20deg)}to{transform:scale(1) rotate(0)}}
+@keyframes inL{to{transform:translateX(88px) scale(.55);opacity:0}}
+@keyframes inR{to{transform:translateX(-88px) scale(.55);opacity:0}}
+@keyframes poof{0%{opacity:.95;transform:scale(.2)}100%{opacity:0;transform:scale(5.5)}}
+@keyframes pop{to{transform:scale(1)}}
+@keyframes fade{to{opacity:1}}
+.statlist{display:grid;grid-template-columns:1fr auto;gap:8px 16px;font-variant-numeric:tabular-nums;margin:0}
+.statlist dt{color:var(--muted);font-weight:700}
+.statlist dd{margin:0;font-weight:800;text-align:right}
+.adbox{border:2.5px dashed var(--line);border-radius:18px;padding:28px 16px;text-align:center;display:grid;gap:6px}
+.adbox .count{font-family:var(--font-display);font-size:44px;line-height:1}
+
+.coach{position:fixed;inset:0;z-index:15;pointer-events:none}
+.coach .ring{position:absolute;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;border:3px solid var(--select);animation:ring 1.2s ease-out infinite}
+.coach .finger{position:absolute;width:40px;height:48px;animation:bob .8s ease-in-out infinite alternate}
+.coach .finger svg{width:100%;height:100%;display:block}
+.coach .bubble{position:absolute;width:max-content;max-width:min(260px,calc(100vw - 24px));background:var(--ink);color:var(--bg);border-radius:14px;padding:10px 12px;font-weight:700;font-size:14px;pointer-events:auto;box-shadow:0 8px 24px var(--pup-shadow);display:grid;gap:8px}
+.coach .bubble button{justify-self:end;border:none;background:var(--accent);color:var(--accent-ink);border-radius:10px;padding:4px 12px;font-weight:800;font-size:13px}
+.coach .bubble button.skip{background:none;color:var(--bg);opacity:.7;text-decoration:underline;padding:0}
+@keyframes bob{to{transform:translateY(8px)}}
+@keyframes ring{0%{transform:scale(.5);opacity:1}100%{transform:scale(1.7);opacity:0}}
+@media (prefers-reduced-motion:reduce){.stage .par,.stage .poof{display:none}.stage .res,.showres .ros{transform:none;animation:none}.resinfo{opacity:1;animation:none}.coach .ring,.coach .finger{animation:none}}
+
+.kbar{display:flex;gap:8px;margin-bottom:10px}
+.goalbtn{flex:1;min-width:0;border:none;background:var(--surface);border-radius:14px;padding:8px 12px;display:flex;align-items:center;gap:10px;text-align:left;font-weight:800;font-size:14px}
+.goalbtn small{display:block;color:var(--muted);font-weight:700;font-size:12px}
+.pips{display:flex;gap:4px;margin-left:auto;flex:none}
+.pips i{width:10px;height:10px;border-radius:50%;background:var(--surface-2);display:block}
+.pips i.done{background:var(--good)}
+.pips i.ready{background:var(--new)}
+.sortbtn{flex:none;border:none;background:var(--surface);border-radius:14px;padding:8px 12px;font-weight:700;font-size:12px;color:var(--muted);text-align:left}
+.sortbtn b{display:block;color:var(--ink);font-size:14px;font-weight:800}
+.goal{background:var(--surface-2);border-radius:14px;padding:10px 12px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 10px;align-items:center}
+.goal b{font-size:15px}
+.goal .cnt{font-size:12px;color:var(--muted);font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.goal .bar{grid-column:1;background:var(--surface)}
+.goal .btn{flex:none;grid-column:2;grid-row:1 / span 2;padding:8px 12px;font-size:14px;font-family:var(--font-body)}
+.toast button{border:none;background:var(--accent);color:var(--accent-ink);border-radius:9px;padding:3px 10px;font-weight:800;font-size:13px;margin-left:10px}
+.blink{animation:blink 4.6s infinite}
+.dexcell .blink{animation:none}
+@keyframes blink{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.08)}}
+.pupcard[aria-pressed="true"] .wag,.stage .res .wag,.showres .wag,.wprev .wag{animation:wag .32s ease-in-out infinite alternate}
+@keyframes wag{from{transform:rotate(-7deg)}to{transform:rotate(9deg)}}
+.pupcard[aria-pressed="true"] .art svg{animation:hop .35s ease-out}
+@keyframes hop{40%{transform:translateY(-7%)}}
+.confetti{position:fixed;inset:0;z-index:40;pointer-events:none;overflow:hidden}
+.confetti i{position:absolute;top:-16px;width:9px;height:14px;border-radius:2px;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}
+@media (prefers-reduced-motion:reduce){.blink,.wag,.pupcard[aria-pressed="true"] .art svg{animation:none!important}.confetti{display:none}}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(150px + env(safe-area-inset-bottom,0px));z-index:30;
+  background:var(--ink);color:var(--bg);font-weight:700;font-size:14px;border-radius:14px;padding:10px 14px;max-width:min(420px,calc(100% - 32px));text-align:center;box-shadow:0 6px 20px var(--pup-shadow)}
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <h1><svg class="ball" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#D3EE45" stroke="#9DB52A" stroke-width="1.5"/><path d="M3 8c5 2 5 6 0 8M21 8c-5 2-5 6 0 8" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>Mix-a-Pup</h1>
+      <button class="ghost" data-act="settings">Settings</button>
+    </div>
+    <div class="status" id="status"></div>
+    <nav class="tabs" role="tablist" id="tabs"></nav>
+  </header>
+  <main id="main"></main>
+</div>
+<div class="tray" id="tray"></div>
+<div class="coach" id="coach" hidden>
+  <div class="ring" id="cring"></div>
+  <div class="finger" id="cfinger"><svg viewBox="0 0 40 48" aria-hidden="true"><g fill="#FFDDBE" stroke="#7A4B2E" stroke-width="2" stroke-linejoin="round"><rect x="13" y="2" width="9" height="28" rx="4.5"/><path d="M8 26c0-3 2-5 5-5h17c4 0 6 3 6 6v8c0 7-5 11-12 11h-4c-7 0-12-5-12-11z"/></g><path d="M22 25v4M27 25v4M32 26v4" stroke="#7A4B2E" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+  <div class="bubble" id="cbub" role="status"></div>
+</div>
+<div class="overlay" id="overlay" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+/* ---------- Data ---------- */
+const DEFAULT={pattern:'solid',ears:'flop',coat:'smooth',snout:'med',legs:'normal',tail:'straight',eye:'brown',size:1,
+  c1:'#E8C08A',c2:'#FFFFFF',c3:'#2E2830',saddle:false,merle:false,tongue:false,bandana:null};
+const T=o=>Object.assign({},DEFAULT,o);
+const STATS=['looks','speed','smarts','heart'], SL={looks:'Looks',speed:'Speed',smarts:'Smarts',heart:'Heart'};
+
+/* s = baseline [looks, speed, smarts, heart] */
+const BASE={
+  lab:{name:'Labrador Retriever',pre:'Lab',suf:'rador',s:[58,60,66,74],blurb:'Steady, food-motivated, and born to swim.',t:{c1:'#F1CD8C',c3:'#7A5A3A'}},
+  poodle:{name:'Poodle',pre:'Poo',suf:'oodle',s:[70,56,80,55],blurb:'Smart, springy, and known for a curly, low-shed coat.',t:{c1:'#F6F0E8',c3:'#BFAF9F',coat:'curly',snout:'long',tail:'plume'}},
+  golden:{name:'Golden Retriever',pre:'Gold',suf:'en',s:[66,56,70,76],blurb:'Feathery coat and endless patience.',t:{c1:'#E3A24E',coat:'fluffy',tail:'plume'}},
+  beagle:{name:'Beagle',pre:'Bea',suf:'gle',s:[52,56,44,70],blurb:'Nose first, always. Tricolor with a white-tipped tail.',t:{c1:'#D6954F',pattern:'tux',saddle:true,ears:'long',size:.9}},
+  pug:{name:'Pug',pre:'Pu',suf:'ug',s:[56,26,42,78],blurb:'Flat face, curly tail, professional napper.',t:{c1:'#EBCB98',pattern:'mask',snout:'short',tail:'curl',size:.84}},
+  corgi:{name:'Corgi',pre:'Cor',suf:'gi',s:[56,50,66,66],blurb:'A herding dog on very short legs.',t:{c1:'#E58E3E',pattern:'tux',ears:'bat',legs:'short',tail:'plume',size:.9}},
+  husky:{name:'Siberian Husky',pre:'Hus',suf:'sky',s:[66,72,44,60],blurb:'Sled dog with ice-blue eyes and a lot to say.',t:{c1:'#878A9C',c3:'#3C3D4A',pattern:'tux',ears:'point',coat:'fluffy',tail:'plume',eye:'blue'}},
+  dachshund:{name:'Dachshund',pre:'Dach',suf:'shund',s:[52,36,46,66],blurb:'Long body, short legs, big bark.',t:{c1:'#B4552F',ears:'long',legs:'short',snout:'long',size:.84}},
+  chihuahua:{name:'Chihuahua',pre:'Chi',suf:'huahua',s:[52,42,46,56],blurb:'The smallest breed, with the biggest ears.',t:{c1:'#E2B27A',c2:'#FFF5E6',pattern:'urajiro',ears:'bat',snout:'short',tail:'curl',size:.7}},
+  dalmatian:{name:'Dalmatian',pre:'Dal',suf:'matian',s:[62,70,54,56],blurb:'Firehouse classic. Born white; the spots come in later.',t:{c1:'#FFFFFF',pattern:'spots'}},
+  shiba:{name:'Shiba Inu',pre:'Shi',suf:'ba',s:[66,56,50,46],blurb:'Fox face, curled tail, independent streak.',t:{c1:'#DE8238',c2:'#FFF6EA',pattern:'urajiro',ears:'point',tail:'curl',size:.88}},
+  shepherd:{name:'German Shepherd',pre:'Shep',suf:'herd',s:[66,70,80,64],blurb:'Black saddle, tall ears, always on duty.',t:{c1:'#C98A47',pattern:'mask',saddle:true,ears:'point',snout:'long',tail:'plume',size:1.05}},
+  collie:{name:'Border Collie',pre:'Bor',suf:'ollie',s:[60,76,88,62],blurb:'A herding genius that needs a job to do.',t:{c1:'#2B2730',pattern:'tux',coat:'fluffy',tail:'plume',size:.98}},
+  pom:{name:'Pomeranian',pre:'Pom',suf:'pom',s:[72,40,56,58],blurb:'A tiny puffball with a big-dog bark.',t:{c1:'#E9963F',coat:'fluffy',ears:'point',snout:'short',tail:'plume',size:.72}},
+  bulldog:{name:'Bulldog',pre:'Bull',suf:'dog',s:[50,24,40,80],blurb:'Wide, wrinkly, and in no hurry at all.',t:{c1:'#FBF7F0',c3:'#C98A55',pattern:'patch',snout:'short',legs:'short',tail:'curl',size:.9}},
+  dane:{name:'Great Dane',pre:'Dane',suf:'dane',s:[68,58,50,72],blurb:'A gentle giant that thinks it’s a lap dog.',t:{c1:'#E0B878',c3:'#2E2830',pattern:'mask',snout:'long',size:1.1}},
+};
+const DES={
+  labradoodle:{name:'Labradoodle',p:['lab','poodle'],hint:'A water-loving retriever plus a curly, low-shed coat.',t:{c1:'#EFC48C',coat:'curly',tail:'plume'}},
+  goldendoodle:{name:'Goldendoodle',p:['golden','poodle'],hint:'The golden family dog, made curly.',t:{c1:'#E3A65C',coat:'curly',tail:'plume'}},
+  puggle:{name:'Puggle',p:['pug','beagle'],hint:'A wrinkly little face meets a nose built for tracking.',t:{c1:'#E0B784',pattern:'mask',ears:'long',tail:'curl',size:.85}},
+  horgi:{name:'Horgi',p:['corgi','husky'],hint:'Sled-dog eyes on a herding dog’s short legs.',t:{c1:'#8F93A3',pattern:'tux',ears:'point',legs:'short',coat:'fluffy',eye:'blue',tail:'plume',size:.9}},
+  chiweenie:{name:'Chiweenie',p:['chihuahua','dachshund'],hint:'The tiniest breed meets the longest body.',t:{c1:'#C27845',ears:'bat',legs:'short',size:.72}},
+  dorgi:{name:'Dorgi',p:['corgi','dachshund'],hint:'Two short-legged breeds. Twice the waddle.',t:{c1:'#C86A35',pattern:'tux',ears:'point',legs:'short',snout:'long',size:.82}},
+  chug:{name:'Chug',p:['pug','chihuahua'],hint:'Two pocket-sized pups with big personalities.',t:{c1:'#E2C095',pattern:'mask',ears:'bat',snout:'short',tail:'curl',size:.72}},
+  shepsky:{name:'Shepsky',p:['husky','shepherd'],hint:'A police-dog favorite meets a sled-dog favorite.',t:{c1:'#A69A8C',pattern:'tux',saddle:true,ears:'point',coat:'fluffy',eye:'blue',tail:'plume',size:1.05}},
+  goldador:{name:'Goldador',p:['lab','golden'],hint:'America’s two favorite retrievers.',t:{c1:'#EBB766'}},
+  doxle:{name:'Doxle',p:['beagle','dachshund'],hint:'A hound’s nose on a hot-dog frame.',t:{c1:'#C9874A',pattern:'tux',saddle:true,ears:'long',legs:'short',snout:'long',size:.85}},
+  dalmadoodle:{name:'Dalmadoodle',p:['dalmatian','poodle'],hint:'Firehouse spots with a curly coat.',t:{c1:'#FFFFFF',pattern:'spots',coat:'curly',tail:'plume'}},
+  shusky:{name:'Shusky',p:['shiba','husky'],hint:'Two fox-faced breeds with curled tails.',t:{c1:'#C9844C',pattern:'tux',ears:'point',coat:'fluffy',tail:'curl',size:.95}},
+  corgipoo:{name:'Corgipoo',p:['corgi','poodle'],hint:'Short legs, curly coat.',t:{c1:'#E9A867',pattern:'tux',coat:'curly',legs:'short',tail:'plume',size:.85}},
+  pugapoo:{name:'Pugapoo',p:['pug','poodle'],hint:'A flat little face under poodle curls.',t:{c1:'#D8BE98',pattern:'mask',coat:'curly',snout:'short',tail:'curl',size:.8}},
+  poosky:{name:'Poosky',p:['poodle','husky'],hint:'Ice-blue eyes and curls.',t:{c1:'#A9ABB8',pattern:'tux',coat:'curly',eye:'blue',tail:'plume'}},
+  labsky:{name:'Labsky',p:['lab','husky'],hint:'A retriever meets a sled dog.',t:{c1:'#3E3A44',pattern:'tux',ears:'point',eye:'blue'}},
+  bordoodle:{name:'Bordoodle',p:['collie','poodle'],hint:'The two brainiest breeds under one curly coat.',t:{c1:'#34303B',pattern:'tux',coat:'curly',tail:'plume'}},
+  borador:{name:'Borador',p:['collie','lab'],hint:'A herding brain with a retriever’s appetite.',t:{c1:'#2F2A33',pattern:'tux',tail:'plume'}},
+  shollie:{name:'Shollie',p:['collie','shepherd'],hint:'Two working dogs that never clock out.',t:{c1:'#6A4A32',pattern:'tux',saddle:true,ears:'point',coat:'fluffy',tail:'plume',size:1.02}},
+  pomsky:{name:'Pomsky',p:['pom','husky'],hint:'A sled dog shrunk down to lap size.',t:{c1:'#9A9DAD',pattern:'tux',ears:'point',coat:'fluffy',eye:'blue',tail:'plume',size:.78}},
+  pomchi:{name:'Pomchi',p:['pom','chihuahua'],hint:'Two tiny breeds, one enormous attitude.',t:{c1:'#E3A45C',c2:'#FFF5E6',pattern:'urajiro',ears:'bat',coat:'fluffy',snout:'short',tail:'plume',size:.68}},
+  beabull:{name:'Beabull',p:['beagle','bulldog'],hint:'A hound’s nose and a bulldog’s stubborn streak.',t:{c1:'#D9A065',pattern:'tux',ears:'long',snout:'short',size:.88}},
+  minibull:{name:'Miniature Bulldog',p:['bulldog','pug'],hint:'Two flat-faced champion snorers.',t:{c1:'#E6C9A0',pattern:'mask',snout:'short',legs:'short',tail:'curl',size:.8}},
+  labradane:{name:'Labradane',p:['dane','lab'],hint:'A giant with a retriever’s grin.',t:{c1:'#3A3540',snout:'long',size:1.1}},
+  danoodle:{name:'Great Danoodle',p:['dane','poodle'],hint:'The tallest curls in the park.',t:{c1:'#C9B79E',coat:'curly',snout:'long',tail:'plume',size:1.1}},
+  australian:{name:'Australian Labradoodle',p:['labradoodle','goldendoodle'],tier:2,value:90,hint:'Secret recipe: mix two different doodles.',t:{c1:'#C98B57',c2:'#F4DCBC',pattern:'urajiro',coat:'curly',tail:'plume'}},
+};
+/* Two rare coats per breed, all real colors for the breed. Index 0 matches the original single coat. */
+const RARE={
+  lab:[{name:'Chocolate Lab',mod:{c1:'#6E4630'}},{name:'Fox Red Lab',mod:{c1:'#C9742F'}}],
+  poodle:[{name:'Silver Poodle',mod:{c1:'#B7BAC5',c3:'#8A8D99'}},{name:'Apricot Poodle',mod:{c1:'#F0B77E'}}],
+  golden:[{name:'English Cream Golden',mod:{c1:'#F3E2C2'}},{name:'Dark Red Golden',mod:{c1:'#B8622C'}}],
+  beagle:[{name:'Lemon Beagle',mod:{c1:'#EFD38C',saddle:false}},{name:'Blue Tricolor Beagle',mod:{c3:'#6B7186',c1:'#D9A065'}}],
+  pug:[{name:'Black Pug',mod:{c1:'#3B3542',c3:'#26212B'}},{name:'Silver Fawn Pug',mod:{c1:'#D8CFC3',c3:'#4A4450'}}],
+  corgi:[{name:'Blue Merle Corgi',mod:{c1:'#A7ACBE',c3:'#4E5367',merle:true}},{name:'Tricolor Corgi',mod:{c1:'#D98B45',saddle:true,c3:'#2E2830'}}],
+  husky:[{name:'Red Husky',mod:{c1:'#C0703F',c3:'#7A3E22'}},{name:'Agouti Husky',mod:{c1:'#6D6556',c3:'#2F2A26'}}],
+  dachshund:[{name:'Dapple Dachshund',mod:{c1:'#7A5640',c3:'#3D3340',merle:true}},{name:'Piebald Dachshund',mod:{c1:'#FBF7F0',pattern:'patch',c3:'#B4552F'}}],
+  chihuahua:[{name:'Blue Chihuahua',mod:{c1:'#8C92A8'}},{name:'Black & Tan Chihuahua',mod:{c1:'#2F2A33',c2:'#D9A066'}}],
+  dalmatian:[{name:'Liver Dalmatian',mod:{c3:'#7B4A35'}},{name:'Lemon Dalmatian',mod:{c3:'#E3BC55'}}],
+  shiba:[{name:'Black & Tan Shiba',mod:{c1:'#34303B',c2:'#F0D2A4'}},{name:'Cream Shiba',mod:{c1:'#F2E2C6'}}],
+  shepherd:[{name:'White Shepherd',mod:{c1:'#F5F2EC',c3:'#E5DDD1',saddle:false,pattern:'solid'}},{name:'Black Shepherd',mod:{c1:'#2F2A33',c3:'#1E1A22',saddle:false,pattern:'solid'}}],
+  collie:[{name:'Red Border Collie',mod:{c1:'#A9562E'}},{name:'Blue Merle Border Collie',mod:{c1:'#9AA1B5',c3:'#3F4354',merle:true}}],
+  pom:[{name:'White Pomeranian',mod:{c1:'#FAF6EE'}},{name:'Black Pomeranian',mod:{c1:'#2F2A33'}}],
+  bulldog:[{name:'Fawn Bulldog',mod:{c1:'#DDB07A',c3:'#4A3B38',pattern:'mask'}},{name:'Red & White Bulldog',mod:{c1:'#C97B45',pattern:'tux'}}],
+  dane:[{name:'Harlequin Great Dane',mod:{c1:'#FAFAFA',c3:'#2E2830',pattern:'solid',merle:true}},{name:'Blue Great Dane',mod:{c1:'#7E8598',pattern:'solid'}}],
+};
+const ITEMS={
+  outfit:[{id:'pumpkin',name:'Pumpkin costume',k:'Halloween',price:45},{id:'sweater',name:'Striped sweater',k:'Cozy',price:35},{id:'cape',name:'Superhero cape',k:'Silly',price:50}],
+  collar:[{id:'red',name:'Classic red collar',k:'Gold tag',price:20},{id:'pinkbow',name:'Pink bow collar',k:'Cutesy',price:25},{id:'bowtie',name:'Dapper bow tie',k:'Fancy',price:30}],
+};
+const ITEM=Object.fromEntries([...ITEMS.outfit,...ITEMS.collar].map(i=>[i.id,i]));
+const RECIPE={}; for(const k in DES) RECIPE[DES[k].p.slice().sort().join('+')]=k;
+const DEX=[...Object.keys(BASE).map(k=>'b:'+k),...Object.keys(DES).map(k=>'d:'+k),...Object.keys(RARE).flatMap(k=>RARE[k].map((_,i)=>'r:'+k+':'+i)),...Object.keys(BASE).map(k=>'a:'+k)];
+const NAMES=['Biscuit','Waffles','Pickles','Nugget','Mochi','Pretzel','Bean','Noodle','Tater','Sprout','Pepper','Ziggy','Clover','Dumpling','Muffin','Rocket','Socks','Tofu','Maple','Bubba','Olive','Peanut','Scout','Bingo','Juniper','Pip','Toast','Gizmo','Honey','Ruckus','Pancake','Moose','Fig','Banjo','Scooter','Wiggles','Nacho','Pudding','Bambi','Chewie','Kiwi','Pinto','Rascal','Sunny','Tucker','Yeti','Zuzu','Hank','Marble','Taco'];
+const BANDANAS=['#E5484D','#3E7BFA','#2FAE77','#F2A93B','#9B5DE5'];
+
+/* Shows. Weights sum to 1. Conformation follows how real breed judging works: structure and coat, movement, ring attitude. */
+const EVENTS={
+  conf:{name:'Conformation',w:{looks:.55,heart:.2,speed:.15,smarts:.1},pure:true,desc:'Judged against the breed standard: structure, coat, how the dog moves, and attitude in the ring. Purebreds only.'},
+  agility:{name:'Agility',w:{speed:.55,smarts:.3,heart:.15},desc:'A timed course of jumps, tunnels, and weave poles. Open to every pup.'},
+  obed:{name:'Obedience',w:{smarts:.6,heart:.25,speed:.15},desc:'Heeling, recalls, and stays, scored for precision. Open to every pup.'},
+};
+const TIERS={
+  local:{name:'Local',fee:5,purse:30,ms:120e3,field:52,handler:4,groom:3},
+  regional:{name:'Regional',fee:15,purse:90,ms:300e3,field:63,handler:10,groom:6},
+  national:{name:'National',fee:40,purse:250,ms:600e3,field:74,handler:25,groom:15},
+};
+const PLACE=['','1st','2nd','3rd','4th','5th','6th','7th','8th'];
+const RIBBON={1:{c:'#2F6FE0',d:'#1D4FAA',n:'Blue'},2:{c:'#E0473C',d:'#A52C23',n:'Red'},3:{c:'#F2C230',d:'#B88C12',n:'Yellow'},4:{c:'#F6F5EF',d:'#B5B3A6',n:'White'},5:{c:'#B9BCD6',d:'#7F84A8',n:'Finisher'}};
+const FLAIR={
+  agility:{win:['{n} flew through the weave poles without touching a single one.','{n} hit every contact zone and finished with a happy spin.','{n} ran the course so fast the timer looked twice.'],
+    place:['{n} ran clean but took the long way around the tunnel.','{n} paused to sniff the A-frame. Still made the ribbons.','{n} knocked one bar, then made up for it on the straightaway.'],
+    back:['{n} loved the tunnel so much they went through it twice.','{n} stopped to say hi to the judge. Twice.','{n} decided the pause table was nap time.']},
+  obed:{win:['{n} held a perfect sit-stay while a squirrel ran past.','{n} heeled like a shadow and earned a near-perfect score.','{n} nailed every recall. The judge applauded.'],
+    place:['{n} nailed the recall but drifted on the figure-eight.','{n} brought the dumbbell back, then kept it for a bit.','{n} was precise everywhere except the long down.'],
+    back:['{n} did a lovely down-stay. During the heeling exercise.','{n} greeted every steward in the ring personally.','{n} got distracted by a hot dog stand.']},
+  conf:{win:['{n} stacked like a statue and moved with a perfect topline.','The judge took one look at {n} and pointed first.','{n} owned the ring from the first lap.'],
+    place:['{n} moved well but couldn’t stop wagging during the exam.','{n} looked sharp. A little more ring polish would push them higher.','{n} gaited beautifully and lost by a whisker.'],
+    back:['{n} sat down during the stack and refused to get up.','{n} spent the down-and-back looking for treats.','{n} tried to lick the judge. Points for enthusiasm.']},
+};
+const COURSES={agility:{name:'Agility drills',stat:'speed'},obed:{name:'Obedience class',stat:'smarts'},social:{name:'Socializing',stat:'heart'}};
+
+const CAP=10, REGEN=40e3, OFFER_MS=180e3, TRAIN_BASE=60e3, MIX_COST=1, SHELTER_COST=25, SHELTER_MUTT_COST=10, REFRESH_COST=5, KENNEL_MAX=24, YARD_MAX=3;
+const KEY='mixapup.v1';
+
+/* ---------- Helpers ---------- */
+function nameOf(id){return BASE[id]?.name||DES[id]?.name||id}
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function hex2(h){h=h.replace('#','');return[0,2,4].map(i=>parseInt(h.slice(i,i+2),16))}
+function mix(a,b,t){const A=hex2(a),B=hex2(b);return'#'+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,'0')).join('')}
+const dk=c=>mix(c,'#1a1420',.24), lt=(c,t)=>mix(c,'#ffffff',t);
+function rng(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const gauss=()=>{let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)};
+const fmt=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`};
+const mins=ms=>ms>=60e3?`${Math.round(ms/60e3)} min`:`${Math.round(ms/1e3)} sec`;
+const today=()=>new Date().toLocaleDateString('en-CA');
+const leap=y=>(y%4===0&&y%100!==0)||y%400===0;
+
+/* ---------- Puppy drawing (layered parts) ---------- */
+let uid=0;
+function pupSVG(t,seed,rare,hat,wear){
+  const W=wear||{};
+  const R=rng(seed||7), id='c'+(++uid);
+  const short=t.legs==='short';
+  const hy=short?54:50, by=short?95:90, brx=short?27:22, bry=short?15:19;
+  const alb=!!t.albino,c1=alb?'#FBF6F2':t.c1,c2=alb?'#FFFFFF':t.c2,c3=alb?'#F0D9D4':t.c3,o=dk(c1),nose=alb?'#E296A5':'#241E2C';
+  const earC=t.pattern==='mask'?c3:c1;
+  const white=t.pattern==='tux'||t.pattern==='urajiro';
+  const s=[];
+  s.push(`<defs><clipPath id="${id}b"><ellipse cx="60" cy="${by}" rx="${brx}" ry="${bry}"/></clipPath><clipPath id="${id}h"><circle cx="60" cy="${hy}" r="29"/></clipPath></defs>`);
+  s.push(`<ellipse cx="60" cy="112" rx="${short?33:28}" ry="4" style="fill:var(--pup-shadow)"/>`);
+  const tx=short?82:77, ty=by+3;
+  s.push(`<g class="wag" style="transform-origin:${tx}px ${ty}px">`);
+  if(t.tail==='plume'){
+    s.push(`<ellipse cx="${tx+10}" cy="${ty-16}" rx="8.5" ry="17" transform="rotate(35 ${tx+10} ${ty-16})" fill="${c1}" stroke="${o}" stroke-width="1.6"/>`);
+    if(t.pattern==='tux') s.push(`<ellipse cx="${tx+19}" cy="${ty-29}" rx="4.5" ry="6" transform="rotate(35 ${tx+19} ${ty-29})" fill="${c2}"/>`);
+  } else {
+    const d=t.tail==='curl'?`M${tx} ${ty} C ${tx+22} ${ty} ${tx+24} ${ty-22} ${tx+12} ${ty-24} C ${tx+2} ${ty-26} ${tx+2} ${ty-12} ${tx+11} ${ty-12}`:`M${tx} ${ty} Q ${tx+18} ${ty-4} ${tx+21} ${ty-26}`;
+    s.push(`<path d="${d}" fill="none" stroke="${o}" stroke-width="9" stroke-linecap="round"/><path d="${d}" fill="none" stroke="${c1}" stroke-width="6.4" stroke-linecap="round"/>`);
+    if(t.tail==='straight'&&t.pattern==='tux') s.push(`<circle cx="${tx+21}" cy="${ty-26}" r="3.6" fill="${c2}"/>`);
+  }
+  s.push('</g>');
+  if(t.coat!=='curly'&&(t.ears==='point'||t.ears==='bat')){
+    const big=t.ears==='bat';
+    const L=big?`M33 ${hy-8} L22 ${hy-46} L54 ${hy-24} Z`:`M36 ${hy-12} L33 ${hy-42} L55 ${hy-24} Z`;
+    const I=big?`M35 ${hy-14} L27 ${hy-38} L48 ${hy-24} Z`:`M39 ${hy-16} L37 ${hy-35} L50 ${hy-24} Z`;
+    [0,1].forEach(m=>{const tr=m?'transform="translate(120 0) scale(-1 1)"':'';
+      s.push(`<g ${tr}><path d="${L}" fill="${earC}" stroke="${t.pattern==='mask'?dk(c3):o}" stroke-width="2.4" stroke-linejoin="round"/><path d="${I}" fill="${mix(earC,'#F2A1B3',.55)}" stroke-linejoin="round"/></g>`)});
+  }
+  if(W.outfit==='cape'){const top=by-bry+2,bot=by+bry+1,l=60-brx-9,r=60+brx+9,q=(r-l)/4;
+    s.push(`<path d="M${60-brx*.55} ${top} L${l} ${bot} Q${l+q} ${bot+5} 60 ${bot} Q${r-q} ${bot+5} ${r} ${bot} L${60+brx*.55} ${top} Z" fill="#E5484D" stroke="#A92C31" stroke-width="1.6" stroke-linejoin="round"/>`)}
+  if(t.coat!=='smooth'){const n=14,rb=t.coat==='curly'?6.5:5;for(let i=0;i<n;i++){const a=i/n*Math.PI*2;s.push(`<circle cx="${(60+(brx-2)*Math.cos(a)).toFixed(1)}" cy="${(by+(bry-2)*Math.sin(a)).toFixed(1)}" r="${rb}" fill="${c1}" stroke="${o}" stroke-width="1.5"/>`)}
+    s.push(`<ellipse cx="60" cy="${by}" rx="${brx}" ry="${bry}" fill="${c1}"/>`);}
+  else s.push(`<ellipse cx="60" cy="${by}" rx="${brx}" ry="${bry}" fill="${c1}" stroke="${o}" stroke-width="1.6"/>`);
+  const bm=[];
+  if(t.saddle) bm.push(`<ellipse cx="60" cy="${by-bry*.75}" rx="${brx+6}" ry="${bry*.75}" fill="${c3}"/>`);
+  if(t.pattern==='spots') for(let i=0;i<7;i++) bm.push(`<circle cx="${(40+R()*40).toFixed(1)}" cy="${(by-bry+R()*bry*2).toFixed(1)}" r="${(2+R()*2.4).toFixed(1)}" fill="${c3}"/>`);
+  if(t.pattern==='patch') bm.push(`<ellipse cx="${R()<.5?48:72}" cy="${by+2}" rx="9" ry="8" fill="${c3}"/>`);
+  if(t.merle) for(let i=0;i<5;i++) bm.push(`<ellipse cx="${(40+R()*40).toFixed(1)}" cy="${(by-bry+R()*bry*2).toFixed(1)}" rx="${(4+R()*5).toFixed(1)}" ry="${(3+R()*4).toFixed(1)}" fill="${c3}" opacity=".6"/>`);
+  if(white) bm.push(`<ellipse cx="60" cy="${by+2}" rx="${short?11:10}" ry="${short?11:14}" fill="${c2}"/>`);
+  if(bm.length) s.push(`<g clip-path="url(#${id}b)">${bm.join('')}</g>`);
+  if(W.outfit==='sweater'){const top=by-bry-2,h=bry*1.55+2;let st='';for(let i=0;4+i*7+3<h-4;i++)st+=`<rect x="20" y="${top+6+i*7}" width="80" height="3" fill="#FFFFFF" opacity=".9"/>`;
+    s.push(`<g clip-path="url(#${id}b)"><rect x="20" y="${top}" width="80" height="${h}" fill="#3E7BFA"/>${st}<rect x="20" y="${top+h-4}" width="80" height="4" fill="#2C5FCC"/></g>`)}
+  if(W.outfit==='pumpkin'){const rx=brx+4,ry=bry+3,cy=by+1;
+    s.push(`<ellipse cx="60" cy="${cy}" rx="${rx}" ry="${ry}" fill="#F28C28" stroke="#B85E12" stroke-width="1.6"/><path d="M${60-rx*.45} ${cy-ry*.9} Q${60-rx*.75} ${cy} ${60-rx*.45} ${cy+ry*.9} M60 ${cy-ry} V${cy+ry} M${60+rx*.45} ${cy-ry*.9} Q${60+rx*.75} ${cy} ${60+rx*.45} ${cy+ry*.9}" fill="none" stroke="#C96A14" stroke-width="1.6"/><path d="M${60+rx*.5} ${cy-ry*.6} q7 -5 12 -1 q-5 5 -12 1Z" fill="#4BA84A" stroke="#2F7A30" stroke-width="1"/>`)}
+  if(W.outfit==='cape') s.push(star5(60,by-1,6.5));
+  const pc=white?c2:c1, px=short?13:11;
+  [60-px,60+px].forEach(x=>s.push(`<ellipse cx="${x}" cy="107" rx="${short?8.5:7.5}" ry="${short?4.6:5.2}" fill="${pc}" stroke="${dk(pc)}" stroke-width="1.4"/><path d="M${x-2} 105.5v3M${x+2} 105.5v3" stroke="${dk(pc)}" stroke-width="1.1" stroke-linecap="round"/>`));
+  if(t.coat!=='smooth'){const n=16,rb=t.coat==='curly'?7:5.5;for(let i=0;i<n;i++){const a=i/n*Math.PI*2;s.push(`<circle cx="${(60+27*Math.cos(a)).toFixed(1)}" cy="${(hy+27*Math.sin(a)).toFixed(1)}" r="${rb}" fill="${c1}" stroke="${o}" stroke-width="1.5"/>`)}
+    s.push(`<circle cx="60" cy="${hy}" r="29" fill="${c1}"/>`);}
+  else s.push(`<circle cx="60" cy="${hy}" r="29" fill="${c1}" stroke="${o}" stroke-width="1.6"/>`);
+  const hm=[];
+  if(t.pattern==='spots') for(let i=0;i<5;i++){const x=34+R()*52,y=hy-26+R()*20;hm.push(`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(1.8+R()*2).toFixed(1)}" fill="${c3}"/>`)}
+  if(t.merle) for(let i=0;i<4;i++) hm.push(`<ellipse cx="${(36+R()*48).toFixed(1)}" cy="${(hy-24+R()*22).toFixed(1)}" rx="${(4+R()*4).toFixed(1)}" ry="${(3+R()*3).toFixed(1)}" fill="${c3}" opacity=".6"/>`);
+  if(t.pattern==='patch') hm.push(`<ellipse cx="${seed%2?47:73}" cy="${hy-2}" rx="10" ry="9" fill="${c3}"/>`);
+  if(t.pattern==='tux') hm.push(`<path d="M60 ${hy-27} C57 ${hy-16} 56 ${hy-6} 54 ${hy+6} L66 ${hy+6} C64 ${hy-6} 63 ${hy-16} 60 ${hy-27} Z" fill="${c2}"/>`);
+  if(white) hm.push(`<ellipse cx="46" cy="${hy+15}" rx="12" ry="9" fill="${c2}"/><ellipse cx="74" cy="${hy+15}" rx="12" ry="9" fill="${c2}"/>`);
+  if(hm.length) s.push(`<g clip-path="url(#${id}h)">${hm.join('')}</g>`);
+  const mc=white?c2:t.pattern==='mask'?c3:lt(c1,.38);
+  const M=t.snout==='short'?{cy:hy+12,rx:14,ry:8}:t.snout==='long'?{cy:hy+15,rx:10,ry:11}:{cy:hy+13,rx:12,ry:9};
+  s.push(`<ellipse cx="60" cy="${M.cy}" rx="${M.rx}" ry="${M.ry}" fill="${mc}" stroke="${dk(mc)}" stroke-opacity=".35" stroke-width="1"/>`);
+  if(t.snout==='short') s.push(`<path d="M51 ${hy+3} Q60 ${hy} 69 ${hy+3}" fill="none" stroke="${dk(t.pattern==='mask'?c3:c1)}" stroke-width="1.3" stroke-linecap="round" opacity=".7"/>`);
+  const ex=t.snout==='short'?14.5:13, er=t.snout==='short'?6:5.6, ey=hy-1;
+  s.push(`<g class="blink" style="transform-origin:60px ${ey}px;animation-delay:-${((seed||7)%46)/10}s">`);
+  [60-ex,60+ex].forEach(x=>{
+    s.push(alb?`<circle cx="${x}" cy="${ey}" r="${er}" fill="#E58A9C"/><circle cx="${x}" cy="${ey}" r="${er*.5}" fill="#A8405C"/>`:t.eye==='blue'?`<circle cx="${x}" cy="${ey}" r="${er}" fill="#5AA9E6"/><circle cx="${x}" cy="${ey}" r="${er*.55}" fill="#1E1A26"/>`:`<circle cx="${x}" cy="${ey}" r="${er}" fill="#241E2C"/>`);
+    s.push(`<circle cx="${x+1.9}" cy="${ey-2.1}" r="${er*.36}" fill="#fff"/><circle cx="${x-1.6}" cy="${ey+1.9}" r="${er*.16}" fill="#fff"/>`);
+  });
+  s.push('</g>');
+  s.push(`<ellipse cx="${60-ex-5}" cy="${hy+9}" rx="4.5" ry="2.6" fill="#FF7FA0" opacity=".35"/><ellipse cx="${60+ex+5}" cy="${hy+9}" rx="4.5" ry="2.6" fill="#FF7FA0" opacity=".35"/>`);
+  const ny=M.cy-5;
+  s.push(`<path d="M54.5 ${ny} Q60 ${ny-4.5} 65.5 ${ny} Q63 ${ny+5} 60 ${ny+5} Q57 ${ny+5} 54.5 ${ny} Z" fill="${nose}"/><ellipse cx="58.3" cy="${ny-1}" rx="1.6" ry=".9" fill="#fff" opacity=".7"/>`);
+  if(t.tongue) s.push(`<ellipse cx="60" cy="${ny+10}" rx="3.6" ry="4.6" fill="#F2809B" stroke="#C9566F" stroke-width="1"/>`);
+  s.push(`<path d="M60 ${ny+4.5} V${ny+7} M60 ${ny+7} Q56.5 ${ny+10} 53.5 ${ny+7} M60 ${ny+7} Q63.5 ${ny+10} 66.5 ${ny+7}" fill="none" stroke="#241E2C" stroke-width="1.6" stroke-linecap="round"/>`);
+  if(t.coat==='curly'){
+    [0,1].forEach(m=>{const tr=m?'transform="translate(120 0) scale(-1 1)"':'';const pts=[[31,hy-6],[28,hy+4],[29,hy+14],[34,hy+20],[35,hy+8]];
+      s.push(`<g ${tr}>${pts.map(([x,y])=>`<circle cx="${x}" cy="${y}" r="7" fill="${earC}" stroke="${t.pattern==='mask'?dk(c3):o}" stroke-width="1.4"/>`).join('')}</g>`)});
+    s.push([[50,hy-28],[60,hy-32],[70,hy-28],[55,hy-24],[65,hy-24]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="8" fill="${c1}" stroke="${o}" stroke-width="1.4"/>`).join('')+`<ellipse cx="60" cy="${hy-22}" rx="13" ry="6" fill="${c1}"/>`);
+  } else if(t.ears==='flop'||t.ears==='long'){
+    const L=t.ears==='long'?`M41 ${hy-18} C24 ${hy-16} 19 ${hy+14} 25 ${hy+30} C32 ${hy+37} 41 ${hy+20} 42 ${hy}`:`M41 ${hy-20} C26 ${hy-20} 21 ${hy+2} 27 ${hy+16} C33 ${hy+22} 41 ${hy+12} 43 ${hy-4}`;
+    [0,1].forEach(m=>{const tr=m?'transform="translate(120 0) scale(-1 1)"':'';
+      s.push(`<path ${tr} d="${L} Z" fill="${earC}" stroke="${t.pattern==='mask'?dk(c3):o}" stroke-width="1.6" stroke-linejoin="round"/>`)});
+  }
+  if(t.bandana&&!W.collar){const y=hy+25;s.push(`<path d="M41 ${y} Q60 ${y+7} 79 ${y} L60 ${y+17} Z" fill="${t.bandana}" stroke="${dk(t.bandana)}" stroke-width="1.2" stroke-linejoin="round"/><circle cx="56" cy="${y+6}" r="1.2" fill="#fff"/><circle cx="64" cy="${y+6}" r="1.2" fill="#fff"/><circle cx="60" cy="${y+11}" r="1.2" fill="#fff"/>`)}
+  if(W.collar){const cy=hy+26,band=(c,d,w)=>`<path d="M41 ${cy-3} Q60 ${cy+5} 79 ${cy-3}" fill="none" stroke="${d}" stroke-width="${w+2}" stroke-linecap="round"/><path d="M41 ${cy-3} Q60 ${cy+5} 79 ${cy-3}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round"/>`;
+    if(W.collar==='red') s.push(band('#D93A3A','#8E2222',4.4)+`<circle cx="60" cy="${cy+5}" r="3.8" fill="#F4C842" stroke="#B88C12" stroke-width="1"/>`);
+    if(W.collar==='pinkbow') s.push(band('#F28BB5','#B8507E',4.4)+`<path d="M60 ${cy+1} L49 ${cy-5} L49 ${cy+7} Z M60 ${cy+1} L71 ${cy-5} L71 ${cy+7} Z" fill="#F28BB5" stroke="#B8507E" stroke-width="1.2" stroke-linejoin="round"/><circle cx="60" cy="${cy+1}" r="2.8" fill="#E0679C" stroke="#B8507E" stroke-width="1"/>`);
+    if(W.collar==='bowtie') s.push(band('#FFFFFF','#BFC3D6',3.4)+`<path d="M60 ${cy+1} L51 ${cy-4} L51 ${cy+6} Z M60 ${cy+1} L69 ${cy-4} L69 ${cy+6} Z" fill="#2A2533" stroke="#14111A" stroke-width="1" stroke-linejoin="round"/><rect x="57.5" y="${cy-1.6}" width="5" height="5.2" rx="1.4" fill="#3A3444"/>`)}
+  if(hat){const b=t.coat==='curly'?hy-36:hy-25;
+    s.push(`<g transform="rotate(-16 60 ${b})"><path d="M47 ${b} L60 ${b-30} L73 ${b} Z" fill="#5B5FE0" stroke="#353899" stroke-width="1.6" stroke-linejoin="round"/><path d="M51.5 ${b-9} L68.5 ${b-9} M55.6 ${b-19} L64.4 ${b-19}" stroke="#F4C842" stroke-width="3" stroke-linecap="round"/><ellipse cx="60" cy="${b}" rx="14" ry="3.2" fill="#F2683A" stroke="#B9461F" stroke-width="1.2"/><circle cx="60" cy="${b-30}" r="4.6" fill="#F4C842" stroke="#C99A1E" stroke-width="1.2"/></g>`)}
+  if(rare) s.push(`<path d="M98 14 L101 22 L109 25 L101 28 L98 36 L95 28 L87 25 L95 22 Z" style="fill:var(--rare)"/><path d="M18 30 L19.6 34 L23.5 35.5 L19.6 37 L18 41 L16.4 37 L12.5 35.5 L16.4 34 Z" style="fill:var(--rare)" opacity=".7"/>`);
+  const sc=clamp(t.size,.6,1.1);
+  return `<svg viewBox="0 0 120 120" aria-hidden="true"><g transform="translate(60 112) scale(${sc}) translate(-60 -112)">${s.join('')}</g></svg>`;
+}
+const TIER_IDX={local:0,regional:1,national:2}, GOLD='#F4C842', GOLDD='#B88C12';
+const prestige=(tier,place)=>TIER_IDX[tier]*2.5+(5-place);
+function star5(cx,cy,r){let d='';for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?r*.45:r;d+=(i?'L':'M')+(cx+rr*Math.cos(a)).toFixed(1)+' '+(cy+rr*Math.sin(a)).toFixed(1)}
+  return `<path d="${d}Z" fill="${GOLD}" stroke="${GOLDD}" stroke-width="1" stroke-linejoin="round"/>`}
+const spark=(x,y,r)=>`<path d="M${x} ${y-r} Q${x} ${y} ${x+r} ${y} Q${x} ${y} ${x} ${y+r} Q${x} ${y} ${x-r} ${y} Q${x} ${y} ${x} ${y-r}Z" fill="${GOLD}"/>`;
+/* Event sets the silhouette: Conformation round, Agility starburst, Obedience shield. */
+function ribBody(ev,R,fill,stroke){const cx=50,cy=44;
+  if(ev==='agility'){let d='';const n=18;for(let i=0;i<n*2;i++){const a=i/(n*2)*Math.PI*2-Math.PI/2,rr=i%2?R-7:R;d+=(i?'L':'M')+(cx+rr*Math.cos(a)).toFixed(1)+' '+(cy+rr*Math.sin(a)).toFixed(1)}
+    return `<path d="${d}Z" fill="${fill}" stroke="${stroke}" stroke-width="1.3" stroke-linejoin="round"/>`}
+  if(ev==='obed'){const w=R*.88;return `<path d="M${cx-w} ${cy-R*.78} Q${cx} ${cy-R*1.08} ${cx+w} ${cy-R*.78} L${cx+w} ${cy+R*.12} Q${cx+w*.92} ${cy+R*.78} ${cx} ${cy+R*1.06} Q${cx-w*.92} ${cy+R*.78} ${cx-w} ${cy+R*.12} Z" fill="${fill}" stroke="${stroke}" stroke-width="1.4" stroke-linejoin="round"/>`}
+  let o='';const n=14;for(let i=0;i<n;i++){const a=i/n*Math.PI*2;o+=`<circle cx="${(cx+(R-7)*Math.cos(a)).toFixed(1)}" cy="${(cy+(R-7)*Math.sin(a)).toFixed(1)}" r="7.6" fill="${fill}" stroke="${stroke}" stroke-width="1.2"/>`}
+  return o+`<circle cx="${cx}" cy="${cy}" r="${R-7}" fill="${fill}"/>`}
+/* Color = place, shape = event, flair = level. */
+function rosette(place,ev,tier){
+  ev=ev||'conf';tier=tier||'local';const ti=TIER_IDX[tier]||0,r=RIBBON[Math.min(place,5)],lab=place<=4?PLACE[place]:'';
+  const edge=ti===2?GOLDD:r.d,tl=ti===0?104:112;
+  let tails=`<path d="M44 58 L33 ${tl} L40 ${tl-7} L46 ${tl+2} L52 60Z" fill="${r.c}" stroke="${edge}" stroke-width="1.3" stroke-linejoin="round"/><path d="M56 58 L67 ${tl} L60 ${tl-7} L54 ${tl+2} L48 60Z" fill="${r.c}" stroke="${edge}" stroke-width="1.3" stroke-linejoin="round"/>`;
+  if(ti===2) tails=`<path d="M46 60 L45 117 L50 111 L55 117 L54 60Z" fill="${GOLD}" stroke="${GOLDD}" stroke-width="1.3" stroke-linejoin="round"/>`+tails;
+  let body='';if(ti===2)body+=ribBody(ev,35,GOLD,GOLDD);if(ti>=1)body+=ribBody(ev,30,lt(r.c,.45),r.d);body+=ribBody(ev,25,r.c,r.d);
+  const med=`<circle cx="50" cy="44" r="14.5" fill="#FFFDF5" stroke="${ti===2?GOLDD:r.d}" stroke-width="${ti===2?2.6:1.2}"/>`;
+  const stars=ti===1?star5(50,36.5,4.6):ti===2?star5(43.5,38,3.6)+star5(50,35,4.4)+star5(56.5,38,3.6):'';
+  const txt=`<text x="50" y="${ti?52.5:49}" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="800" font-size="${lab?(ti?11:13):11}" fill="#23264A">${lab||'\u2713'}</text>`;
+  const sp=ti===2?spark(9,16,5.5)+spark(91,24,4.5)+spark(10,76,4.5)+spark(90,80,5.5):'';
+  return `<svg viewBox="0 0 100 120" aria-hidden="true">${tails}${body}${med}${stars}${txt}${sp}</svg>`}
+const svgCache=new Map();
+function art(p){const hat=!!(p.date&&(ui.hats||isAnniv(p))),w=p.wear||{};const k=p.id+':'+hat+':'+(w.outfit||'')+':'+(w.collar||'');if(!svgCache.has(k))svgCache.set(k,pupSVG(p.traits,p.seed,p.kind==='rare',hat,w));return svgCache.get(k)}
+function itemArt(it,slot,p){const k='item:'+it.id+':'+p.id;if(!svgCache.has(k))svgCache.set(k,pupSVG(p.traits,p.seed,p.kind==='rare',false,{[slot]:it.id}));return svgCache.get(k)}
+function dexTraits(key){const[k,id,i]=key.split(':');if(k==='b')return T(BASE[id].t);if(k==='d')return T(DES[id].t);if(k==='a')return T({...BASE[id].t,albino:true});return T({...BASE[id].t,...RARE[id][+i].mod})}
+function dexArt(key){const ck='dex:'+key;if(!svgCache.has(ck))svgCache.set(ck,pupSVG(dexTraits(key),11,key[0]==='r'));return svgCache.get(ck)}
+function dexName(key){const[k,id,i]=key.split(':');return k==='b'?BASE[id].name:k==='d'?DES[id].name:k==='a'?'Albino '+BASE[id].name:RARE[id][+i].name}
+
+/* ---------- Stats ---------- */
+function breedBase(id){if(BASE[id])return BASE[id].s;const ps=DES[id].p.map(breedBase);return ps[0].map((v,i)=>Math.round((v+ps[1][i])/2))}
+function rollStats(arr,spread){const o={};STATS.forEach((k,i)=>o[k]=Math.round(clamp(arr[i]+(Math.random()*2-1)*spread,5,99)));return o}
+function inheritStats(a,b,kind){const o={};STATS.forEach(k=>o[k]=Math.round(clamp((a.stats[k]+b.stats[k])/2+gauss()*6,5,99)));
+  if(kind==='rare')o.looks=Math.min(99,o.looks+6);if(kind==='mutt')o.heart=Math.min(99,o.heart+2);return o}
+const avgStat=p=>STATS.reduce((s,k)=>s+p.stats[k],0)/4;
+function statBars(st,w){return `<div class="stats">${STATS.filter(k=>!w||w[k]).map(k=>`<span class="lbl">${SL[k]}${w?`<span class="w">${Math.round(w[k]*100)}%</span>`:''}</span><span class="sb"><i style="width:${st[k]}%"></i></span><span>${st[k]}</span>`).join('')}</div>`}
+const statLine=st=>STATS.map(k=>`${SL[k]} ${st[k]}`).join(' · ');
+
+/* ---------- Pups ---------- */
+function freshName(s){const used=new Set(s.pups.map(p=>p.name));const pool=NAMES.filter(n=>!used.has(n));return rnd(pool.length?pool:NAMES)}
+function makePup(kind,breed,traits,extra){return Object.assign({kind,breed,traits,trainUntil:0,trainings:0,ribbons:{},show:null},extra||{})}
+const makeBase=b=>makePup('base',b,T({...BASE[b].t,tongue:Math.random()<.25}),{label:BASE[b].name,stats:rollStats(BASE[b].s,12)});
+const makeRare=(b,i)=>makePup('rare',b,T({...BASE[b].t,...RARE[b][i].mod,tongue:Math.random()<.3}),{label:RARE[b][i].name,coat:i});
+const makeDes=d=>makePup('designer',d,T({...DES[d].t,tongue:Math.random()<.3}),{label:DES[d].name});
+function preOf(p){return p.kind==='mutt'?p.pre:BASE[p.breed]?BASE[p.breed].pre:DES[p.breed].name.slice(0,4)}
+function sufOf(p){return p.kind==='mutt'?p.suf:BASE[p.breed]?BASE[p.breed].suf:DES[p.breed].name.slice(-4).toLowerCase()}
+function makeMutt(a,b){
+  const ta=a.traits,tb=b.traits,t={},pick=k=>Math.random()<.5?ta[k]:tb[k];
+  ['pattern','ears','coat','snout','legs','tail','eye','c2','c3','saddle','merle'].forEach(k=>t[k]=pick(k));
+  t.c1=Math.random()<.55?mix(ta.c1,tb.c1,.3+Math.random()*.4):pick('c1');
+  t.size=clamp((ta.size+tb.size)/2+(Math.random()-.5)*.1,.66,1.08);
+  if(Math.random()<.22){const m=Math.random();if(m<.35)t.pattern='patch';else if(m<.6)t.eye='blue';else if(m<.8)t.coat=t.coat==='smooth'?'fluffy':'smooth';else t.c1=mix(t.c1,'#8A5A3C',.4)}
+  t.tongue=Math.random()<.4; t.bandana=Math.random()<.4?rnd(BANDANAS):null;
+  const pre=preOf(a),suf=sufOf(b),word=(pre+suf).replace(/(.)\1\1/g,'$1$1');
+  return makePup('mutt',null,T(t),{label:word.charAt(0).toUpperCase()+word.slice(1).toLowerCase(),pre,suf,baseValue:12+Math.floor(Math.random()*19)});
+}
+/* Shelter mutts: random stats with a ceiling, so mixing stays the path to champions. */
+function shelterMutt(){const keys=Object.keys(BASE);let a=rnd(keys),b=rnd(keys);while(b===a)b=rnd(keys);const m=makeMutt(makeBase(a),makeBase(b));
+  m.stats={};STATS.forEach(k=>m.stats[k]=20+Math.floor(Math.random()*41));return m}
+function dexKey(p){return p.kind==='base'?'b:'+p.breed:p.kind==='designer'?'d:'+p.breed:p.kind==='rare'?'r:'+p.breed+':'+(p.coat||0):null}
+const ribTotal=p=>Object.values(p.ribbons||{}).reduce((a,b)=>a+b,0);
+function valueOf(p){const b=p.kind==='base'?10:p.kind==='designer'?(DES[p.breed].value||35):p.kind==='rare'?55:p.baseValue;
+  let wins=0;for(const k in p.ribbons)if(+k<=4)wins+=p.ribbons[k];return Math.round(b*(.6+avgStat(p)/80))+3*wins+(p.albino?20:0)}
+function kindTag(p){return p.kind==='rare'?'Rare coat':p.kind==='designer'?(DES[p.breed].tier?'Secret cross':'Designer'):p.kind==='mutt'?'Mutt':'Purebred'}
+function addPup(s,p,how){p.id=s.nextId++;p.name=freshName(s);p.seed=p.seed||Math.floor(Math.random()*1e9);p.date=Date.now();p.dateType=how||'birthday';s.pups.push(p);
+  const k=dexKey(p);let isNew=false;if(k&&!s.dex[k]){s.dex[k]=Date.now();isNew=true}if(p.kind==='mutt')s.mutts++;
+  if(p.albino){s.albinos=(s.albinos||0)+1;if(p.kind==='base'&&!s.dex['a:'+p.breed]){s.dex['a:'+p.breed]=Date.now();isNew=true}}return isNew}
+function mixResult(a,b){
+  let p;
+  if(a.kind==='mutt'||b.kind==='mutt') p=makeMutt(a,b);
+  else if(a.breed===b.breed){
+    if(BASE[a.breed]){const hit=Math.random()<rareChance(a,b);p=hit?makeRare(a.breed,pickCoat(a,b)):makeBase(a.breed);state.pity=state.pity||{};state.pity[a.breed]=hit?0:(state.pity[a.breed]||0)+1}
+    else p=makeDes(a.breed);
+  } else {const d=RECIPE[[a.breed,b.breed].sort().join('+')];p=d?makeDes(d):makeMutt(a,b)}
+  p.stats=inheritStats(a,b,p.kind);
+  /* Albino: 2% on any mix, 12% with one albino parent, 50% with two. Not stacked on rare coats. */
+  const ac=[a,b].filter(x=>x.albino).length;
+  if(p.kind!=='rare'&&Math.random()<(ac===2?.5:ac===1?.12:.02)){p.albino=true;p.traits.albino=true;p.label='Albino '+p.label}
+  return p;
+}
+/* Rare coats: base chance rises 12 points per miss and is guaranteed on the 6th try for that breed. */
+function pickCoat(a,b){const n=RARE[a.breed].length,par=[a,b].filter(x=>x.kind==='rare').map(x=>x.coat||0);
+  if(par.length&&Math.random()<.6)return rnd(par);
+  const un=[...Array(n).keys()].filter(i=>!state.dex['r:'+a.breed+':'+i]);
+  return un.length&&Math.random()<.7?rnd(un):Math.floor(Math.random()*n)}
+function rareChance(a,b){if(a.breed!==b.breed||!BASE[a.breed]||a.kind==='mutt'||b.kind==='mutt')return 0;
+  const base=(a.kind==='rare'&&b.kind==='rare')?.6:(a.kind==='rare'||b.kind==='rare')?.4:.22,miss=(state.pity||{})[a.breed]||0;
+  return miss>=5?1:Math.min(1,base+.12*miss)}
+const busy=p=>p.trainUntil>0||!!p.show;
+const isPure=p=>p.kind==='base'||p.kind==='rare';
+
+/* ---------- Training ---------- */
+const trainMs=p=>TRAIN_BASE*(1+Math.min(4,Math.floor((p.trainings||0)/2)));
+const gainRange=v=>{const f=(100-v)/60;return[Math.max(1,Math.round(4*f)),Math.max(1,Math.round(9*f))]};
+function finishTraining(p){
+  const c=COURSES[p.trainCourse]||COURSES.agility,k=c.stat,[lo,hi]=gainRange(p.stats[k]);
+  const g=lo+Math.floor(Math.random()*(hi-lo+1));p.stats[k]=Math.min(99,p.stats[k]+g);
+  let msg=`${p.name} finished ${c.name.toLowerCase()}. ${SL[k]} +${g}`;
+  if(Math.random()<.25){const o=rnd(['speed','smarts','heart'].filter(x=>x!==k)),b=1+Math.floor(Math.random()*2);p.stats[o]=Math.min(99,p.stats[o]+b);msg+=`, ${SL[o]} +${b}`}
+  p.trainUntil=0;p.trainings=(p.trainings||0)+1;p.trainCourse=null;toast(msg+'.');bump('train');
+}
+
+/* ---------- Shows ---------- */
+const eligible=(p,ev)=>!EVENTS[ev].pure||isPure(p);
+function scoreOf(p,ev,handler,groom){const w=EVENTS[ev].w;let s=0;for(const k in w)s+=w[k]*p.stats[k];
+  if(handler)s+=5;if(groom&&ev==='conf')s+=w.looks*10;return s}
+const fieldOf=(ev,tier)=>TIERS[tier].field+(ev==='conf'?3:0);
+function outlook(diff){return diff>=8?['Favorite','var(--good)']:diff>=0?['Contender','var(--select)']:diff>=-8?['Long shot','var(--new)']:['Outclassed','var(--muted)']}
+function runShow(p,ev,tier,handler,groom){
+  const tr=TIERS[tier],fld=fieldOf(ev,tier),est=scoreOf(p,ev,handler,groom),day=(Math.random()*2-1)*8,score=est+day;
+  const comps=Array.from({length:7},()=>fld+gauss()*9);
+  const place=1+comps.filter(c=>c>score).length,top=Math.max(score,...comps);
+  const payout=place===1?tr.purse:place===2?Math.round(tr.purse*.5):place===3?Math.round(tr.purse*.3):place===4?Math.round(tr.purse*.15):Math.ceil(tr.fee*.4);
+  const w=EVENTS[ev].w;let carry=null,cv=null;
+  for(const k in w){const v=w[k]*(p.stats[k]-fld);if(cv===null||(place<=4?v>cv:v<cv)){cv=v;carry=k}}
+  const pool=FLAIR[ev][place===1?'win':place<=4?'place':'back'];
+  return {place,score:Math.round(score),top:Math.round(top),payout,carry,line:rnd(pool),day:Math.round(day),handler,groom:groom&&ev==='conf'};
+}
+
+/* ---------- Birthdays & gotcha days ---------- */
+function isAnniv(p){if(!p.date)return false;const d=new Date(p.date),n=new Date();if(n.getFullYear()-d.getFullYear()<1)return false;
+  let m=d.getMonth(),day=d.getDate();if(m===1&&day===29&&!leap(n.getFullYear()))day=28;return n.getMonth()===m&&n.getDate()===day}
+const dayWord=p=>p.dateType==='gotcha'?'Gotcha day':'Birthday';
+const md=ts=>new Date(ts).toLocaleDateString(undefined,{month:'short',day:'numeric'});
+function ageStr(p){const days=Math.floor((Date.now()-p.date)/864e5),g=p.dateType==='gotcha';
+  if(days<1)return g?'Adopted today':'Born today';
+  if(days<60)return `${days} day${days>1?'s':''} ${g?'home':'old'}`;
+  const mo=Math.floor(days/30.4);if(mo<24)return `${mo} months ${g?'home':'old'}`;
+  return `${Math.floor(days/365.25)} years ${g?'home':'old'}`}
+function party(){const d=today();if(state.lastParty===d)return;state.lastParty=d;const ps=state.pups.filter(isAnniv);if(!ps.length){save();return}
+  state.treats=Math.min(state.treats+3*ps.length,CAP+10);save();
+  toast(ps.length===1?`Happy ${dayWord(ps[0]).toLowerCase()}, ${ps[0].name}! +3 treats`:`${ps.length} pups are celebrating today! +${3*ps.length} treats`)}
+
+/* ---------- Goals ---------- */
+/* Three goals a day. Claiming on back-to-back days builds a streak worth +10% coins per day, up to +50%. */
+const GOALS={
+  mix:{t:n=>`Mix ${n} pups`,n:[2,3,4],coins:12},
+  show:{t:n=>n>1?`Enter ${n} shows`:'Enter a show',n:[1,2],coins:14},
+  ribbon:{t:()=>'Win a ribbon (top 4)',n:[1],coins:20},
+  train:{t:n=>n>1?`Finish ${n} training sessions`:'Finish a training session',n:[1,2],coins:12},
+  adopt:{t:()=>'Adopt a shelter pup',n:[1],coins:12},
+  rehome:{t:()=>'Find a pup a furever home',n:[1],coins:8},
+  fresh:{t:()=>'Add a new Pupdex entry',n:[1],coins:25},
+};
+const DEX_STEP=10, DEX_PRIZE=30, SORTS={age:'By age',stats:'Top stats',breed:'By breed'};
+const dayStr=ts=>new Date(ts).toLocaleDateString('en-CA');
+const streakPct=n=>Math.min(5,Math.max(0,n-1))*10;
+function rollGoals(s){const d=today();if(s.goals&&s.goals.day===d)return false;
+  let pool=Object.keys(GOALS);if(Object.keys(s.dex).length>=DEX.length)pool=pool.filter(k=>k!=='fresh');
+  const list=[];while(list.length<3){const k=pool.splice(Math.floor(Math.random()*pool.length),1)[0],g=GOALS[k],n=rnd(g.n);list.push({k,n,p:0,claimed:false,coins:g.coins+(n-g.n[0])*6})}
+  s.goals={day:d,list};return true}
+function streakNow(){const st=state.streak||{n:0,day:''};return st.day===today()||st.day===dayStr(Date.now()-864e5)?st.n:0}
+function claimStreak(){const st=state.streak||{n:0,day:''};return st.day===today()?st.n:st.day===dayStr(Date.now()-864e5)?st.n+1:1}
+const dexReady=()=>Object.keys(state.dex).length>=((state.dexClaim||0)+1)*DEX_STEP;
+const claimable=()=>state.goals.list.some(g=>!g.claimed&&g.p>=g.n)||dexReady();
+function bump(k,n){const g=state.goals&&state.goals.list.find(g=>g.k===k&&!g.claimed);if(!g)return;const was=g.p>=g.n;g.p=clamp(g.p+(n||1),0,g.n);
+  if(!was&&g.p>=g.n)toast(`Goal done: ${GOALS[k].t(g.n)}. Claim it in the Kennel.`)}
+const sortMode=()=>SORTS[state.settings.sort]?state.settings.sort:'age';
+function sortedPups(){const m=sortMode(),a=state.pups.slice();
+  if(m==='stats')a.sort((x,y)=>avgStat(y)-avgStat(x));else if(m==='breed')a.sort((x,y)=>x.label.localeCompare(y.label)||x.id-y.id);return a}
+function goalBar(){const L=state.goals.list,done=L.filter(g=>g.claimed).length,ready=L.filter(g=>!g.claimed&&g.p>=g.n).length+(dexReady()?1:0);
+  const pips=L.map(g=>`<i class="${g.claimed?'done':g.p>=g.n?'ready':''}"></i>`).join('');
+  return `<div class="kbar"><button class="goalbtn" data-act="goals"><span>Today’s goals<small>${ready?`${ready} ready to claim`:done===3?'All done. New ones tomorrow.':`${done} of 3 claimed`}</small></span><span class="pips">${pips}</span></button><button class="sortbtn" data-act="sort" aria-label="Change kennel sort order">Sort<b>${SORTS[sortMode()]}</b></button></div>`}
+function showGoals(){
+  const sn=streakNow(),pct=streakPct(claimStreak()),found=Object.keys(state.dex).length,nextAt=((state.dexClaim||0)+1)*DEX_STEP,have=Math.min(found,nextAt);
+  const rows=state.goals.list.map((g,i)=>{const done=g.p>=g.n,c=Math.round(g.coins*(1+pct/100));
+    return `<div class="goal"><div><b>${GOALS[g.k].t(g.n)}</b> <span class="cnt">${g.p} / ${g.n}</span></div>${g.claimed?`<button class="btn" disabled>Claimed</button>`:`<button class="btn ${done?'primary':''}" data-act="claim" data-i="${i}" ${done?'':'disabled'}><span class="cost">${I.coin}${c}</span></button>`}<div class="bar"><i style="width:${Math.round(g.p/g.n*100)}%"></i></div></div>`}).join('');
+  const dex=nextAt>DEX.length?'':`<div class="lab">Pupdex milestone</div><div class="goal"><div><b>Find ${nextAt} Pupdex entries</b> <span class="cnt">${have} / ${nextAt}</span></div><button class="btn ${dexReady()?'primary':''}" data-act="claimDex" ${dexReady()?'':'disabled'}><span class="cost">${I.coin}${DEX_PRIZE}</span></button><div class="bar"><i style="width:${Math.round(have/nextAt*100)}%"></i></div></div>`;
+  openSheet(`<h2>Today’s goals</h2><div class="sub">${sn?`Streak: day ${sn}`:'No streak yet'} · ${pct?`coin rewards +${pct}%`:'claim a goal every day to grow rewards'}</div>${rows}<p class="note" style="margin:0;text-align:center">Clear all three for 3 bonus treats. New goals arrive at midnight.</p>${dex}<button class="btn" data-act="close">Done</button>`,'Goals',true);
+}
+function mixHint(a,b){
+  if(a.kind==='mutt'||b.kind==='mutt')return 'A mutt in the mix always makes a mutt. Stats pass down from both.';
+  if(a.breed===b.breed){const rc=rareChance(a,b);return rc?`Rare coat chance: ${Math.round(rc*100)}%. It goes up with every miss.`:`Makes another ${nameOf(a.breed)}.`}
+  const d=RECIPE[[a.breed,b.breed].sort().join('+')];
+  return d?(state.dex['d:'+d]?`Makes a ${DES[d].name}.`:'Something about this pair feels promising.'):'No known cross here. You’ll get a one-of-a-kind mutt.'}
+
+/* ---------- State ---------- */
+function newGame(){const now=Date.now();const s={v:1,coins:25,treats:CAP,treatsAt:now,kennelCap:8,kennelBuys:0,yardCap:1,pups:[],dex:{},mutts:0,offers:[],offersAt:now,nextId:1,
+  stats:{sessions:0,days:[],mixes:0,rehomes:0,ads:0,shows:0,purses:0,started:now}};
+  ['lab','poodle','pug','beagle','corgi'].forEach(b=>addPup(s,makeBase(b),'gotcha'));rollOffers(s);migrate(s);return s}
+function migrate(s){
+  s.settings=s.settings||{askMutt:false}; s.hints=s.hints||{}; delete s.tip; s.owned=s.owned||{}; s.albinos=s.albinos||0;
+  for(const k of Object.keys(s.dex)){const m=k.match(/^r:([a-z]+)$/);if(m){s.dex['r:'+m[1]+':0']=s.dex[k];delete s.dex[k]}}
+  s.stats.shows=s.stats.shows||0; s.stats.purses=s.stats.purses||0;
+  s.pups.forEach(p=>{
+    if(!p.date){p.date=s.stats.started;p.dateType='gotcha'}if(p.kind==='rare'&&p.coat===undefined)p.coat=0;
+    if(!p.stats){p.stats=p.kind==='mutt'?rollStats([45,45,45,50],15):rollStats(breedBase(p.breed),12);if(p.kind==='rare')p.stats.looks=Math.min(99,p.stats.looks+6)}
+    if(p.stars){p.trainings=(p.trainings||0)+p.stars;for(let i=0;i<p.stars;i++){const k=rnd(['speed','smarts','heart']);p.stats[k]=Math.min(99,p.stats[k]+5)}delete p.stars}
+    p.ribbons=p.ribbons||{};p.history=p.history||[];if(!p.case){p.case={};p.history.forEach(x=>{if(x.place<=4){const k=x.ev+'|'+x.tier+'|'+x.place;p.case[k]=(p.case[k]||0)+1}})}if(p.show===undefined)p.show=null;p.trainings=p.trainings||0;
+  });
+  (s.offers||[]).forEach(o=>{if(!o.pup.stats)o.pup.stats=o.pup.kind==='mutt'?rollStats([40,40,40,40],18):rollStats(BASE[o.pup.breed].s,12)});
+  if(!s.tut){const a=s.pups.find(p=>p.breed==='lab'&&p.kind==='base'),b=s.pups.find(p=>p.breed==='poodle'&&p.kind==='base');
+    s.tut=(s.stats.mixes===0&&a&&b)?{done:false,a:a.id,b:b.id}:{done:true}}
+  rollGoals(s);
+  return s}
+/* Shelters are mostly mutts. About 1 in 4 arrivals is a purebred, leaning toward breeds you haven't found. */
+function rollOffers(s){const keys=Object.keys(BASE);
+  s.offers=[0,1,2].map(()=>{let p;if(Math.random()<.25){const un=keys.filter(k=>!s.dex['b:'+k]);p=makeBase(un.length&&Math.random()<.6?rnd(un):rnd(keys))}else p=shelterMutt();p.seed=Math.floor(Math.random()*1e9);p.id='o'+Math.random().toString(36).slice(2,8);return{pup:p,sold:false}})}
+function load(){try{const r=localStorage.getItem(KEY);if(!r)return null;const s=JSON.parse(r);return s&&s.v===1?s:null}catch(e){return null}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
+const expandCost=()=>Math.round(40*Math.pow(1.55,state.kennelBuys)/5)*5;
+const yardCost=()=>state.yardCap===1?60:140;
+const training=()=>state.pups.filter(p=>p.trainUntil>0);
+const offerCost=o=>o.pup.kind==='mutt'?SHELTER_MUTT_COST:SHELTER_COST;
+const pupById=id=>state.pups.find(p=>p.id===+id);
+
+let state, ui={tab:'kennel',sel:[],dexSel:null,hats:false,entry:null};
+
+/* ---------- Icons ---------- */
+const I={
+  coin:`<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8.5" fill="#F4C842" stroke="#C99A1E" stroke-width="1.5"/><circle cx="10" cy="10" r="5" fill="none" stroke="#C99A1E" stroke-width="1.2"/></svg>`,
+  bone:`<svg viewBox="0 0 24 24" aria-hidden="true"><g transform="rotate(-35 12 12)"><g fill="#F3E3C7" stroke="#B0946A" stroke-width="1.3"><circle cx="5" cy="9.3" r="3"/><circle cx="5" cy="14.7" r="3"/><circle cx="19" cy="9.3" r="3"/><circle cx="19" cy="14.7" r="3"/></g><rect x="5" y="9" width="14" height="6" fill="#F3E3C7"/><path d="M5.5 9H18.5M5.5 15H18.5" stroke="#B0946A" stroke-width="1.3"/></g></svg>`,
+  house:`<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 9.5 10 3.5l7 6V17H3Z" fill="#8F93FF" stroke="#5357D4" stroke-width="1.4" stroke-linejoin="round"/><path d="M8 17v-4.5a2 2 0 0 1 4 0V17" fill="#23264A"/></svg>`,
+  book:`<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3.5" y="2.5" width="13" height="15" rx="2" fill="#F2683A" stroke="#B9461F" stroke-width="1.4"/><circle cx="10" cy="9.5" r="2" fill="#fff"/><circle cx="7.4" cy="7.4" r="1" fill="#fff"/><circle cx="12.6" cy="7.4" r="1" fill="#fff"/></svg>`,
+  card:`<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="4" width="15" height="12" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="7.5" cy="9" r="2" fill="currentColor"/><path d="M4.8 13.6c.6-1.5 1.6-2.2 2.7-2.2s2.1.7 2.7 2.2M12 8.5h3.5M12 11.5h3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>`,
+};
+
+/* ---------- Render ---------- */
+const $=id=>document.getElementById(id);
+function renderStatus(){
+  const now=Date.now(), found=Object.keys(state.dex).length;
+  const regen=state.treats<CAP?`<small>+1 in ${fmt(REGEN-(now-state.treatsAt))}</small>`:'';
+  const ad=state.treats<CAP?`<button class="adbtn" data-act="ad" aria-label="Watch a rewarded ad for 3 treats">+3</button>`:'';
+  $('status').innerHTML=
+    `<span class="chip" title="Coins">${I.coin}${state.coins}</span>`+
+    `<span class="chip" title="Treats (each mix costs one)">${I.bone}${state.treats}/${CAP} ${regen}${ad}</span>`+
+    `<span class="chip" title="Kennel">${I.house}${state.pups.length}/${state.kennelCap}</span>`+
+    `<span class="chip" title="Pupdex">${I.book}${found}/${DEX.length}</span>`;
+}
+function renderTabs(){
+  const ready=state.pups.some(p=>p.show&&p.show.ready);
+  const tabs=[['kennel','Kennel'],['dex','Pupdex'],['shelter','Shelter'],['train','Train'],['shows','Shows'],['shop','Shop']];
+  $('tabs').innerHTML=tabs.map(([k,l])=>`<button role="tab" aria-selected="${ui.tab===k}" data-act="tab" data-tab="${k}">${l}${k==='shows'&&ready?'<span class="dot" aria-label="results ready"></span>':''}${k==='kennel'&&ui.tab!=='kennel'&&claimable()?'<span class="dot" aria-label="goal ready to claim"></span>':''}</button>`).join('');
+}
+function badge(p){
+  if(p.show&&p.show.ready) return `<span class="badge b-res">Results</span>`;
+  if(p.show) return `<span class="badge b-train" data-until="${p.show.until}">${fmt(p.show.until-Date.now())}</span>`;
+  if(p.trainUntil>0) return `<span class="badge b-train" data-until="${p.trainUntil}">${fmt(p.trainUntil-Date.now())}</span>`;
+  if(p.albino) return `<span class="badge b-alb">Albino</span>`;
+  if(p.kind==='rare') return `<span class="badge b-rare">Rare</span>`;
+  if(p.kind==='designer') return `<span class="badge b-des">${DES[p.breed].tier?'Secret':'Designer'}</span>`;
+  if(p.kind==='mutt') return `<span class="badge b-mutt">Mutt</span>`;
+  return '';
+}
+function bestPlace(p){const k=[1,2,3,4].find(k=>p.ribbons&&p.ribbons[k]);return k||0}
+function bestByEvent(p){const out={};for(const k in (p.case||{})){const[ev,tier,pl]=k.split('|'),v=prestige(tier,+pl);if(!out[ev]||v>out[ev].v)out[ev]={ev,tier,place:+pl,v}}return Object.values(out).sort((a,b)=>b.v-a.v)}
+function pin(p){const b=bestByEvent(p);
+  if(b.length) return `<span class="pins">${b.map(x=>`<span class="pin" title="Best ${EVENTS[x.ev].name}: ${PLACE[x.place]}, ${TIERS[x.tier].name}">${rosette(x.place,x.ev,x.tier)}</span>`).join('')}</span>`;
+  const l=bestPlace(p);return l?`<span class="pins"><span class="pin">${rosette(l)}</span></span>`:''}
+function ribs(p){return [1,2,3,4].filter(k=>p.ribbons[k]).map(k=>`<span><i style="background:${RIBBON[k].c}"></i>${p.ribbons[k]}</span>`).join('')}
+function renderKennel(){
+  const cards=sortedPups().map(p=>{const i=ui.sel.indexOf(p.id);
+    return `<button class="pupcard ${p.show&&!p.show.ready?'away':''}" data-act="sel" data-id="${p.id}" aria-pressed="${i>=0}" aria-label="${esc(p.name)}, ${esc(p.label)}">${i>=0?`<span class="selnum">${i+1}</span>`:''}${badge(p)}<div class="art">${art(p)}${pin(p)}</div><div class="nm">${esc(p.name)}</div><div class="br">${esc(p.label)}</div><div class="ribs">${ribs(p)}</div></button>`}).join('');
+  const maxed=state.kennelCap>=KENNEL_MAX, c=expandCost();
+  const add=`<button class="addcard" data-act="expand" ${maxed||state.coins<c?'disabled':''}><span class="big">+2</span>${maxed?'Kennel maxed':`Add runs <span class="cost">${I.coin}${c}</span>`}</button>`;
+  $('main').innerHTML=`<div class="sectionhead"><h2>Your kennel</h2><span>${state.pups.length} of ${state.kennelCap} runs</span></div>${goalBar()}<div class="grid">${cards}${add}</div>`;
+}
+function renderTray(){
+  const tray=$('tray');
+  if(ui.tab!=='kennel'){tray.hidden=true;return}
+  tray.hidden=false;
+  const sel=ui.sel.map(pupById).filter(Boolean);
+  ui.sel=sel.map(p=>p.id);
+  let line,btns;
+  if(sel.length===0){
+    line=`<div class="trayline"><div class="txt"><b>Pick two pups to mix</b><span>Or pick one to train, show, or rehome.</span></div></div>`;
+    btns=`<button class="btn primary" disabled>${I.bone}Mix</button>`;
+  } else if(sel.length===1){
+    const p=sel[0], info=`<button class="iconbtn" data-act="profile" data-id="${p.id}" aria-label="${esc(p.name)}’s profile">${I.card}</button>`;
+    if(p.show&&p.show.ready){
+      line=`<div class="trayline"><div class="mini">${art(p)}</div><div class="txt"><b>${esc(p.name)} is back!</b><span>${TIERS[p.show.tier].name} ${EVENTS[p.show.ev].name} results are in.</span></div>${info}</div>`;
+      btns=`<button class="btn primary" data-act="results" data-id="${p.id}">See results</button>`;
+    } else if(p.show){
+      line=`<div class="trayline"><div class="mini">${art(p)}</div><div class="txt"><b>${esc(p.name)} is at a show</b><span>${TIERS[p.show.tier].name} ${EVENTS[p.show.ev].name} · back in <span data-until="${p.show.until}">${fmt(p.show.until-Date.now())}</span></span></div>${info}</div>`;
+      btns=`<button class="btn" disabled>Away at show</button>`;
+    } else {
+      const tr=p.trainUntil>0, yardFull=training().length>=state.yardCap, canRehome=!tr&&state.pups.length>2;
+      line=`<div class="trayline"><div class="mini">${art(p)}</div><div class="txt"><b>${esc(p.name)} · ${esc(p.label)}</b><span class="statline">${statLine(p.stats)}</span></div>${info}</div>`;
+      const trainLbl=tr?`<span data-until="${p.trainUntil}">${fmt(p.trainUntil-Date.now())}</span>`:yardFull?'Yard full':'Train';
+      btns=`<button class="btn" id="rehomeBtn" data-act="rehome" ${canRehome?'':'disabled'}>Rehome <span class="cost">${I.coin}${valueOf(p)}</span></button><button class="btn" data-act="train" ${tr||yardFull?'disabled':''}>${trainLbl}</button><button class="btn primary" id="showBtn" data-act="enter" ${tr?'disabled':''}>Show</button>`;
+    }
+  } else {
+    const [a,b]=sel, bz=sel.find(busy), full=state.pups.length>=state.kennelCap, broke=state.treats<MIX_COST;
+    const why=bz?`${esc(bz.name)} is ${bz.show?'away at a show':'in training'}.`:full?'Kennel full. Rehome a pup or add runs.':broke?`Out of treats. Next one in ${fmt(REGEN-(Date.now()-state.treatsAt))}.`:mixHint(a,b);
+    line=`<div class="trayline"><div class="mini">${art(a)}</div><div class="mini">${art(b)}</div><div class="txt"><b>${esc(a.name)} + ${esc(b.name)}</b><span>${why}</span></div></div>`;
+    btns=`<button class="btn primary" id="mixBtn" data-act="mix" ${bz||full||broke?'disabled':''}>${I.bone}Mix · 1 treat</button>`;
+  }
+  tray.innerHTML=`<div class="trayin">${line}<div class="btnrow">${btns}</div></div>`;
+}
+function renderDex(){
+  const found=Object.keys(state.dex).length, pct=Math.round(found/DEX.length*100);
+  const key=ui.dexSel||DEX.find(k=>state.dex[k])||DEX[0];
+  const has=!!state.dex[key], [k,id]=key.split(':'), no=String(DEX.indexOf(key)+1).padStart(3,'0');
+  let title=has?dexName(key):'???', kind=k==='b'?'Purebred':k==='d'?(DES[id].tier?'Secret cross':'Designer cross'):k==='a'?'Albino':'Rare coat', body;
+  if(k==='b') body=has?`${BASE[id].blurb} Rare coats found: ${RARE[id].filter((_,i)=>state.dex['r:'+id+':'+i]).length} of ${RARE[id].length}. Every ${BASE[id].name} + ${BASE[id].name} mix rolls for one.`:'Purebreds are uncommon at the Shelter. Keep checking new arrivals.';
+  else if(k==='d') body=has?`${DES[id].p.map(nameOf).join(' + ')}. ${DES[id].hint}`:DES[id].hint;
+  else if(k==='a') body=has?`An albino ${BASE[id].name}: pale coat, pink nose, rosy eyes. Albino parents pass it on more often.`:`Any mix can make an albino pup, but it\u2019s rare. Mix ${BASE[id].name}s and hope.`;
+  else body=has?`A rare coat on a ${BASE[id].name}. Rare coats show with a little extra Looks.`:`Mix two ${BASE[id].name}s for a chance at this coat.`;
+  const cell=key2=>{const h=!!state.dex[key2],n=String(DEX.indexOf(key2)+1).padStart(3,'0');
+    return `<button class="dexcell ${h?'':'sil'}" data-act="dex" data-key="${key2}" aria-pressed="${key2===key}" aria-label="${h?esc(dexName(key2)):'Undiscovered'} number ${n}"><div>${dexArt(key2)}</div><div class="no">No. ${n}</div><div class="nm">${h?esc(dexName(key2)):'???'}</div></button>`};
+  const sec=(label,pre)=>{const keys=DEX.filter(x=>x.startsWith(pre));const n=keys.filter(x=>state.dex[x]).length;
+    return `<div class="sectionhead"><h2>${label}</h2><span>${n} of ${keys.length}</span></div><div class="dexgrid">${keys.map(cell).join('')}</div>`};
+  $('main').innerHTML=`
+    <div class="dexhead"><div class="big ${has?'':'sil'}">${dexArt(key)}</div><div class="info"><span class="reg">Registry no. ${no} · ${kind}</span><h3>${esc(title)}</h3><p>${esc(body)}</p></div></div>
+    <div class="sectionhead" style="margin-top:0"><h2>Pupdex</h2><span>${found} of ${DEX.length} · ${state.mutts} mutts</span></div>
+    <div class="bar" style="margin-bottom:14px"><i style="width:${pct}%"></i></div>
+    ${sec('Purebreds','b:')}${sec('Designer crosses','d:')}${sec('Rare coats','r:')}${sec('Albino','a:')}
+    <p class="note">Mutts don’t get a registry number. Every one is unique, so the Pupdex just counts them. Albino pups found, all kinds: ${state.albinos}.</p>`;
+}
+function renderShelter(){
+  const now=Date.now(), free=now-state.offersAt>=OFFER_MS, full=state.pups.length>=state.kennelCap;
+  const offers=state.offers.map((o,i)=>{const p=o.pup,c=offerCost(o),m=p.kind==='mutt';
+    const sub=o.sold?'New pups arrive on refresh.':m?'Shelter mutt. One of a kind.':BASE[p.breed].blurb;
+    return `<div class="offer"><div class="art">${o.sold?'':art(p)}</div><div class="txt"><b>${o.sold?'Adopted':esc(p.label)}${o.sold?'':m?' <span class="tag b-mutt" style="vertical-align:2px">Mutt</span>':' <span class="tag b-des" style="vertical-align:2px">Purebred</span>'}</b><span>${sub}</span>${o.sold?'':`<span class="statline">${statLine(p.stats)}</span>`}</div>${o.sold?'':`<button class="btn" data-act="buy" data-i="${i}" ${state.coins<c||full?'disabled':''}>Adopt <span class="cost">${I.coin}${c}</span></button>`}</div>`}).join('');
+  const ref=free?`<button class="btn" data-act="refresh">New arrivals (free)</button>`:`<button class="btn" data-act="refresh" ${state.coins<REFRESH_COST?'disabled':''}>New arrivals <span class="cost">${I.coin}${REFRESH_COST}</span> <small data-free="${state.offersAt+OFFER_MS}">free in ${fmt(state.offersAt+OFFER_MS-now)}</small></button>`;
+  $('main').innerHTML=`<div class="sectionhead"><h2>Shelter</h2><span>Purebreds ${SHELTER_COST} · mutts ${SHELTER_MUTT_COST}</span></div>
+    <p class="note">${full?'Your kennel is full. Rehome a pup or add runs before adopting.':'Most shelter pups are mutts. Purebreds turn up now and then, often breeds you haven\u2019t found yet.'}</p>
+    <div class="shop">${offers}<div class="btnrow">${ref}</div></div>`;
+}
+function renderTrain(){
+  const tr=training(), now=Date.now(), slots=[];
+  for(let i=0;i<state.yardCap;i++){const p=tr[i];
+    if(p){const total=trainMs(p), done=clamp(1-(p.trainUntil-now)/total,0,1), c=COURSES[p.trainCourse]||COURSES.agility;
+      slots.push(`<div class="slot"><div class="art">${art(p)}</div><div class="txt"><b>${esc(p.name)} · ${c.name}</b><div class="bar"><i style="width:${(done*100).toFixed(0)}%"></i></div><span class="reg">${SL[c.stat]} ${p.stats[c.stat]} · <span data-until="${p.trainUntil}">${fmt(p.trainUntil-now)}</span></span></div></div>`)}
+    else slots.push(`<div class="slot empty">Empty slot. Select a pup in the Kennel, then tap Train.</div>`)}
+  const up=state.yardCap<YARD_MAX?`<button class="btn" data-act="yardup" ${state.coins<yardCost()?'disabled':''}>Add a training slot <span class="cost">${I.coin}${yardCost()}</span></button>`:'';
+  $('main').innerHTML=`<div class="sectionhead"><h2>Training yard</h2><span>${tr.length} of ${state.yardCap} slots</span></div>
+    <p class="note">Agility drills build Speed, obedience class builds Smarts, socializing builds Heart. Gains shrink as a stat gets high. Looks come from pedigree, so mix for them.</p>
+    <div class="shop">${slots.join('')}<div class="btnrow">${up}</div></div>`;
+}
+function renderShows(){
+  const now=Date.now(), ready=state.pups.filter(p=>p.show&&p.show.ready), away=state.pups.filter(p=>p.show&&!p.show.ready);
+  const rdy=ready.map(p=>`<div class="slot"><div class="art">${art(p)}</div><div class="txt"><b>${esc(p.name)} is back</b><span class="reg">${TIERS[p.show.tier].name} ${EVENTS[p.show.ev].name}</span></div><button class="btn primary" data-act="results" data-id="${p.id}">Results</button></div>`).join('');
+  const aw=away.map(p=>{const tot=TIERS[p.show.tier].ms,done=clamp(1-(p.show.until-now)/tot,0,1);
+    return `<div class="slot"><div class="art">${art(p)}</div><div class="txt"><b>${esc(p.name)} · ${TIERS[p.show.tier].name} ${EVENTS[p.show.ev].name}</b><div class="bar"><i style="width:${(done*100).toFixed(0)}%"></i></div><span class="reg">Back in <span data-until="${p.show.until}">${fmt(p.show.until-now)}</span></span></div></div>`}).join('');
+  const evs=Object.values(EVENTS).map(e=>`<div class="evcard"><b>${e.name}</b><p>${e.desc}</p><p class="statline">${Object.entries(e.w).map(([k,v])=>`${SL[k]} ${Math.round(v*100)}%`).join(' · ')}</p></div>`).join('');
+  const tiers=`<div class="tierrow h"><span>Level</span><span>Entry</span><span>1st place</span><span>Time</span></div>`+Object.values(TIERS).map(t=>`<div class="tierrow"><span>${t.name}</span><span class="cost">${I.coin}${t.fee}</span><span class="cost">${I.coin}${t.purse}</span><span>${mins(t.ms)}</span></div>`).join('');
+  const key=[1,2,3,4].map(k=>`<span><i style="background:${RIBBON[k].c}"></i>${PLACE[k]} ${RIBBON[k].n.toLowerCase()}</span>`).join('');
+  $('main').innerHTML=`<div class="sectionhead"><h2>Shows</h2><span>${away.length} away · ${ready.length} back</span></div>
+    <p class="note">Pick a pup in the Kennel and tap Show. Pay the entry up front, add a handler or a groom if you like, and your pup comes home with results.</p>
+    <div class="shop">${rdy}${aw}${!rdy&&!aw?'<div class="slot empty">No pups out right now.</div>':''}</div>
+    <div class="sectionhead" style="margin-top:18px"><h2>Events</h2></div><div class="shop">${evs}</div>
+    <div class="sectionhead" style="margin-top:18px"><h2>Levels</h2></div><div>${tiers}</div>
+    <div class="sectionhead" style="margin-top:18px"><h2>Ribbons</h2></div>
+    <p class="note">Color shows the place. Every finisher also gets part of the entry back.</p><div class="ribkey" style="margin-bottom:14px">${key}</div>
+    <p class="note">Shape shows the event:</p><div class="rkrow">${Object.entries(EVENTS).map(([k,e])=>`<div class="rk">${rosette(1,k,'local')}<small>${e.name}</small></div>`).join('')}</div>
+    <p class="note">Flair shows the level:</p><div class="rkrow">${Object.entries(TIERS).map(([k,t])=>`<div class="rk">${rosette(1,'conf',k)}<small>${t.name}</small></div>`).join('')}</div>`;
+}
+function renderShop(){
+  const sample=state.pups[0];
+  const card=(slot,it)=>{const own=!!state.owned[it.id];
+    return `<div class="item"><div class="art">${itemArt(it,slot,sample)}</div><b>${it.name}</b><span class="k">${it.k}</span>${own?`<button class="btn" disabled>Owned</button>`:`<button class="btn" data-act="buyItem" data-id="${it.id}" ${state.coins<it.price?'disabled':''}><span class="cost">${I.coin}${it.price}</span></button>`}</div>`};
+  $('main').innerHTML=`<div class="sectionhead"><h2>Shop</h2><span>Shown on ${esc(sample.name)}</span></div>
+    <p class="note">Buy once and any pup can wear it. Dress pups from their profile under Wardrobe. Outfits are just for looks and never change show scores.</p>
+    <div class="sectionhead"><h2>Outfits</h2></div><div class="shopgrid">${ITEMS.outfit.map(i=>card('outfit',i)).join('')}</div>
+    <div class="sectionhead"><h2>Collars</h2></div><div class="shopgrid">${ITEMS.collar.map(i=>card('collar',i)).join('')}</div>
+    <div class="slot empty">Coin and treat packs come with the app store version.</div>`;
+}
+function wardrobeHTML(p){const w=p.wear||{};
+  const sec=(slot,label)=>{const own=ITEMS[slot].filter(i=>state.owned[i.id]);
+    const chips=[`<button class="wchip" data-act="wear" data-slot="${slot}" data-v="" data-id="${p.id}" aria-pressed="${!w[slot]}">None</button>`,...own.map(i=>`<button class="wchip" data-act="wear" data-slot="${slot}" data-v="${i.id}" data-id="${p.id}" aria-pressed="${w[slot]===i.id}">${i.name}</button>`)].join('');
+    return `<div class="lab">${label}</div><div class="wchips">${own.length?chips:'<span class="note" style="margin:0">None owned yet. Visit the Shop.</span>'}</div>`};
+  return `<div class="wprev">${art(p)}</div>${sec('outfit','Outfit')}${sec('collar','Collar')}<button class="btn" data-act="close">Done</button>`}
+function render(){
+  renderStatus();renderTabs();
+  ({kennel:renderKennel,dex:renderDex,shelter:renderShelter,train:renderTrain,shows:renderShows,shop:renderShop})[ui.tab]();
+  renderTray();placeCoach();
+}
+function updateCountdowns(){
+  const now=Date.now();
+  document.querySelectorAll('[data-until]').forEach(el=>el.textContent=fmt(+el.dataset.until-now));
+  document.querySelectorAll('[data-free]').forEach(el=>{const left=+el.dataset.free-now;if(left<=0)render();else el.textContent='free in '+fmt(left)});
+}
+
+/* ---------- Tutorial & tips ---------- */
+function coachSpec(){
+  if(!$('overlay').hidden) return null;
+  const t=state.tut;
+  if(!t.done){
+    if(ui.tab!=='kennel') return null;
+    const a=pupById(t.a), b=pupById(t.b);
+    if(!a||!b){t.done=true;save();return null}
+    if(!ui.sel.includes(a.id)) return {sel:`.pupcard[data-id="${a.id}"]`,text:`Tap ${a.name} the Labrador.`,tut:true};
+    if(!ui.sel.includes(b.id)) return {sel:`.pupcard[data-id="${b.id}"]`,text:`Now tap ${b.name} the Poodle.`,tut:true};
+    return {sel:'#mixBtn',text:'Tap Mix to see what they make.',tut:true};
+  }
+  const h=state.hints;
+  if(ui.tab==='kennel'&&ui.sel.length===0&&!h.goals) return {sel:'.goalbtn',text:'New: three goals every day. Finish them for coins and bonus treats.',k:'goals'};
+  if(ui.tab==='kennel'&&ui.sel.length===1&&!h.single) return {sel:'#showBtn',text:'Send pups to shows to win purses. Train first to raise their stats.',k:'single'};
+  if(ui.tab==='shelter'&&!h.shelter) return {sel:'.offer .btn',text:'Spend coins here to adopt purebreds and shelter mutts.',k:'shelter'};
+  if(ui.tab==='train'&&!h.yard) return {sel:'.slot',text:'Pups train here, even with the app closed. Each session raises a stat.',k:'yard'};
+  if(ui.tab==='shows'&&!h.shows) return {sel:'.evcard',text:'Each event weighs stats differently. Match the pup to the event.',k:'shows'};
+  if(ui.tab==='shop'&&!h.shop) return {sel:'.item .btn',text:'Buy an item once and any pup can wear it. Dress pups from their profile.',k:'shop'};
+  if(ui.tab==='dex'&&!h.dex) return {sel:'.dexgrid .sil',text:'Tap a silhouette for a hint on how to find that pup.',k:'dex'};
+  return null;
+}
+function placeCoach(){
+  const el=$('coach'), c=state&&coachSpec(), tg=c&&document.querySelector(c.sel);
+  if(!c||!tg){el.hidden=true;el.dataset.key='';return}
+  const r=tg.getBoundingClientRect();
+  if(!r.width){el.hidden=true;return}
+  el.hidden=false;
+  const bub=$('cbub'), key=c.sel+'|'+c.text;
+  if(el.dataset.key!==key){el.dataset.key=key;
+    bub.innerHTML=`<span>${esc(c.text)}</span>`+(c.tut?`<button class="skip" data-act="tutskip">Skip tutorial</button>`:`<button data-act="hintok" data-k="${c.k}">Got it</button>`)}
+  const x=r.left+r.width/2, y=r.top+r.height/2;
+  $('cring').style.left=x+'px';$('cring').style.top=y+'px';
+  $('cfinger').style.left=(x-17)+'px';$('cfinger').style.top=(y-2)+'px';
+  const bw=bub.offsetWidth,bh=bub.offsetHeight;
+  bub.style.left=clamp(x-bw/2,12,innerWidth-bw-12)+'px';
+  bub.style.top=(r.top-bh-12>8?r.top-bh-12:Math.min(r.bottom+12,innerHeight-bh-12))+'px';
+}
+addEventListener('scroll',()=>placeCoach(),{passive:true});
+addEventListener('resize',()=>placeCoach());
+
+/* ---------- Overlays & toast ---------- */
+/* Toasts that land in the same instant queue up instead of overwriting each other. */
+let toastT,toastQ=[],toastAt=0;
+function toast(msg,undo){const t=$('toast');if(!t.hidden&&Date.now()-toastAt<400){toastQ.push([msg,undo]);return}toastQ=[];putToast(msg,undo)}
+function putToast(msg,undo){const t=$('toast');t.innerHTML=`<span>${esc(msg)}</span>`+(undo?'<button data-act="undo">Undo</button>':'');t.hidden=false;toastAt=Date.now();clearTimeout(toastT);
+  toastT=setTimeout(()=>{const n=toastQ.shift();if(n)putToast(n[0],n[1]);else t.hidden=true},undo?6000:2600)}
+let actx;
+const SFX={mix:[[392,0,.09],[523,.09,.09],[784,.2,.18]],fresh:[[659,0,.1],[880,.1,.1],[1175,.2,.28]],coin:[[988,0,.07],[1319,.07,.14]],win:[[523,0,.11],[659,.11,.11],[784,.22,.11],[1047,.33,.3]],place:[[523,0,.12],[659,.12,.22]],back:[[330,0,.14],[294,.14,.24]]};
+function sfx(k){if(!state||state.settings.sound===false)return;
+  try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==='suspended')actx.resume();const t0=actx.currentTime;
+    (SFX[k]||[]).forEach(([f,at,d])=>{const o=actx.createOscillator(),g=actx.createGain();o.type='triangle';o.frequency.value=f;
+      g.gain.setValueAtTime(0,t0+at);g.gain.linearRampToValueAtTime(.09,t0+at+.015);g.gain.exponentialRampToValueAtTime(.001,t0+at+d);
+      o.connect(g);g.connect(actx.destination);o.start(t0+at);o.stop(t0+at+d+.02)})}catch(e){}}
+function confetti(){if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  const c=document.createElement('div'),cols=['#D3EE45','#F2683A','#5357D4','#F4C842','#B44FCF','#2FAE77'];c.className='confetti';
+  for(let i=0;i<36;i++){const p=document.createElement('i');p.style.cssText=`left:${Math.random()*100}%;background:${cols[i%cols.length]};animation-duration:${1.3+Math.random()*1.2}s;animation-delay:${Math.random()*.35}s`;c.appendChild(p)}
+  document.body.appendChild(c);setTimeout(()=>c.remove(),3200)}
+function openSheet(html,label,keepFocus){$('sheet').innerHTML=html;$('sheet').setAttribute('aria-label',label);$('overlay').hidden=false;placeCoach();if(!keepFocus)setTimeout(()=>$('sheet').querySelector('button:not([disabled])')?.focus(),50)}
+function closeSheet(){$('overlay').hidden=true;$('sheet').innerHTML='';clearInterval(adT);ui.entry=null;render()}
+let lastNew=null,adT;
+function showResult(a,b,p,isNew){
+  lastNew=p.id;
+  const tags=[isNew?`<span class="tag t-new">New to Pupdex</span>`:'',p.albino?`<span class="tag b-alb">Albino</span>`:'',`<span class="tag ${p.kind==='rare'?'b-rare':p.kind==='designer'?'b-des':'b-mutt'}">${kindTag(p)}</span>`].join('');
+  const line=p.albino?'An albino pup. Pale coat, pink nose, and rosy eyes.':p.kind==='mutt'?'No two mutts look alike.':p.kind==='rare'?'A rare coat. Keep this one around.':p.kind==='designer'?DES[p.breed].hint:'Same breed in, same breed out.';
+  const rehomeBtn=`<button type="button" class="btn" data-act="rehomeNew">Rehome <span class="cost">${I.coin}+${valueOf(p)}</span></button>`;
+  let actions;
+  if(p.kind==='mutt'&&state.settings.askMutt){
+    actions=`<form data-id="${p.id}"><div class="field"><label for="rnBreed">Name this breed</label><input id="rnBreed" maxlength="24" value="${esc(p.label)}" autocomplete="off"></div><div class="btnrow">${rehomeBtn}<button type="submit" class="btn primary">Keep ${esc(p.name)}</button></div></form>`;
+  } else {
+    actions=`<div class="btnrow">${rehomeBtn}<button class="btn primary" data-act="close">Keep ${esc(p.name)}</button></div>`+(p.kind==='mutt'?`<button class="btn link" data-act="profile" data-id="${p.id}">Name this breed</button>`:'');
+  }
+  openSheet(`<div class="stage"><div class="par pa">${art(a)}</div><div class="par pb">${art(b)}</div><div class="poof"></div><div class="res">${art(p)}</div></div>
+    <div class="resinfo"><h2>${esc(p.name)}</h2><div class="sub">${esc(p.label)} · born today</div><div class="tags">${tags}</div><p class="note" style="text-align:center;margin:0">${esc(line)}</p>${statBars(p.stats)}${actions}</div>`,'Mix result');
+}
+function caseHTML(p){const cs=Object.entries(p.case||{}).map(([k,n])=>{const[ev,tier,pl]=k.split('|');return{ev,tier,place:+pl,n,v:prestige(tier,+pl)}}).sort((a,b)=>b.v-a.v);
+  if(!cs.length)return'';
+  return `<div class="lab">Ribbon case</div><div class="rcase">${cs.map(x=>`<div class="rc">${rosette(x.place,x.ev,x.tier)}<b>${PLACE[x.place]}${x.n>1?` \u00d7${x.n}`:''}</b><small>${TIERS[x.tier].name} ${EVENTS[x.ev].name}</small></div>`).join('')}</div>`}
+function recordHTML(p){
+  const h=p.history||[];
+  if(!h.length) return `<div class="slot empty">${ribTotal(p)?'Ribbons won before show records started aren\u2019t listed. New shows will appear here.':`No shows yet. Select ${esc(p.name)} in the Kennel and tap Show.`}</div>`;
+  const wins=h.filter(x=>x.place===1).length, top4=h.filter(x=>x.place<=4).length, purse=h.reduce((a,x)=>a+x.payout,0);
+  const best=h.reduce((b,x)=>!b||x.place<b.place||(x.place===b.place&&TIERS[x.tier].field>TIERS[b.tier].field)?x:b,null);
+  const rows=Object.entries(EVENTS).map(([k,e])=>{const xs=h.filter(x=>x.ev===k);if(!xs.length)return'';const bp=Math.min(...xs.map(x=>x.place));
+    return `<span>${e.name}</span><span>${xs.length}</span><span>${xs.filter(x=>x.place===1).length}</span><span>${PLACE[bp]}</span>`}).join('');
+  const list=h.map(x=>`<div class="hrow"><i style="background:${RIBBON[Math.min(x.place,5)].c}"></i><div><b>${PLACE[x.place]} · ${TIERS[x.tier].name} ${EVENTS[x.ev].name}</b><small>${md(x.t)} · score ${x.score}</small><small>${esc(x.line)}</small></div><span class="amt cost">${I.coin}+${x.payout}</span></div>`).join('');
+  return `<dl class="summary"><dt>Shows entered</dt><dd>${h.length}</dd><dt>Wins</dt><dd>${wins}</dd><dt>Ribbon rate (top 4)</dt><dd>${Math.round(top4/h.length*100)}%</dd><dt>Best finish</dt><dd>${PLACE[best.place]} · ${TIERS[best.tier].name} ${EVENTS[best.ev].name}</dd><dt>Purses won</dt><dd class="cost">${I.coin}${purse}</dd></dl>
+    ${caseHTML(p)}
+    <div class="evtbl"><span class="h">Event</span><span class="h">Shows</span><span class="h">Wins</span><span class="h">Best</span>${rows}</div>
+    <div class="lab">History, newest first</div><div class="hist">${list}</div>`;
+}
+function showProfile(p){
+  const tab=ui.ptab||'profile', n=(p.history||[]).length;
+  const tabs=`<div class="ptabs" role="tablist"><button role="tab" aria-selected="${tab==='profile'}" data-act="ptab" data-v="profile" data-id="${p.id}">Profile</button><button role="tab" aria-selected="${tab==='wardrobe'}" data-act="ptab" data-v="wardrobe" data-id="${p.id}">Wardrobe</button><button role="tab" aria-selected="${tab==='record'}" data-act="ptab" data-v="record" data-id="${p.id}">Record${n?` (${n})`:''}</button></div>`;
+  const head=`<div class="sheethead"><div class="mini">${art(p)}${pin(p)}</div><div><h2>${esc(p.name)}</h2><div class="sub">${esc(p.label)} · ${kindTag(p)}</div></div></div>`;
+  let body;
+  if(tab==='wardrobe') body=wardrobeHTML(p);
+  else if(tab==='record') body=recordHTML(p)+`<button class="btn" data-act="close">Close</button>`;
+  else {
+    const breed=p.kind==='mutt'?`<div class="field"><label for="rnBreed">Breed name</label><input id="rnBreed" maxlength="24" value="${esc(p.label)}" autocomplete="off"></div>`:'';
+    const rb=[1,2,3,4,5].filter(k=>p.ribbons[k]).map(k=>`${p.ribbons[k]} ${k<=4?RIBBON[k].n.toLowerCase():'finisher'}`).join(' · ')||'None yet';
+    body=`${statBars(p.stats)}
+    <dl class="summary"><dt>${dayWord(p)}</dt><dd>${md(p.date)} · ${ageStr(p)}</dd><dt>Ribbons</dt><dd>${rb}</dd><dt>Training sessions</dt><dd>${p.trainings||0}</dd><dt>Rehome value</dt><dd class="cost">${I.coin}${valueOf(p)}</dd></dl>
+    <form data-id="${p.id}"><div class="field"><label for="rnName">Pup name</label><input id="rnName" maxlength="16" value="${esc(p.name)}" autocomplete="off"></div>${breed}
+    <div class="btnrow"><button type="button" class="btn" data-act="close">Close</button><button type="submit" class="btn primary">Save</button></div></form>`;
+  }
+  openSheet(head+tabs+body,'Pup profile',true);
+}
+function showTrain(p){
+  const ch=Object.entries(COURSES).map(([k,c])=>{const v=p.stats[c.stat],[lo,hi]=gainRange(v);
+    return `<button class="choice" data-act="trainGo" data-c="${k}"><b>${c.name}</b><span>${SL[c.stat]} ${v} · +${lo}${hi>lo?` to +${hi}`:''} · ${mins(trainMs(p))}</span></button>`}).join('');
+  openSheet(`<div class="sheethead"><div class="mini">${art(p)}</div><div><h2>Train ${esc(p.name)}</h2><div class="sub">Pick a course. Looks can’t be trained.</div></div></div><div class="choices">${ch}</div><button class="btn" data-act="close">Cancel</button>`,'Training');
+}
+function entryHTML(){
+  const e=ui.entry,p=pupById(e.pid),tr=TIERS[e.tier],isConf=e.ev==='conf';
+  const cost=tr.fee+(e.handler?tr.handler:0)+(e.groom&&isConf?tr.groom:0);
+  const est=scoreOf(p,e.ev,e.handler,e.groom&&isConf),[ol,oc]=outlook(est-fieldOf(e.ev,e.tier));
+  const evs=Object.entries(EVENTS).map(([k,v])=>{const ok=eligible(p,k);return `<button data-act="eSet" data-k="ev" data-v="${k}" aria-pressed="${e.ev===k}" ${ok?'':'disabled'}>${v.name}<small>${ok?'':'Purebreds only'}</small></button>`}).join('');
+  const trs=Object.entries(TIERS).map(([k,v])=>`<button data-act="eSet" data-k="tier" data-v="${k}" aria-pressed="${e.tier===k}">${v.name}<small>${mins(v.ms)}</small></button>`).join('');
+  return `<div class="sheethead"><div class="mini">${art(p)}</div><div><h2>Enter ${esc(p.name)}</h2><div class="sub statline">${statLine(p.stats)}</div></div></div>
+    <div class="lab">Event</div><div class="seg">${evs}</div>
+    <div class="lab">Level</div><div class="seg">${trs}</div>
+    <label class="setrow" for="eHandler"><span>Hire a handler<small>A pro in the ring. Score +5, ${tr.handler} coins.</small></span><input type="checkbox" id="eHandler" ${e.handler?'checked':''}></label>
+    <label class="setrow ${isConf?'':'off'}" for="eGroom"><span>Professional groom<small>${isConf?`Looks +10 for this show, ${tr.groom} coins.`:'Conformation only.'}</small></span><input type="checkbox" id="eGroom" ${e.groom&&isConf?'checked':''} ${isConf?'':'disabled'}></label>
+    ${statBars(p.stats,EVENTS[e.ev].w)}
+    <dl class="summary"><dt>Expenses</dt><dd class="cost">${I.coin}${cost}</dd><dt>1st place purse</dt><dd class="cost">${I.coin}${tr.purse}</dd><dt>Back in</dt><dd>${mins(tr.ms)}</dd><dt>Outlook</dt><dd><span class="outlook" style="background:${oc}">${ol}</span></dd></dl>
+    <div class="btnrow"><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="enterGo" ${state.coins<cost?'disabled':''}>${state.coins<cost?'Not enough coins':`Enter · ${cost}`}</button></div>`;
+}
+function showEntry(p){
+  ui.entry={pid:p.id,ev:isPure(p)?'conf':'agility',tier:'local',handler:false,groom:false};
+  openSheet(entryHTML(),'Show entry');
+}
+function showShowResult(p){
+  const s=p.show,r=s.res,ev=EVENTS[s.ev],tr=TIERS[s.tier];
+  sfx(r.place===1?'win':r.place<=4?'place':'back');if(r.place===1)confetti();
+  const head=r.place===1?'1st place!':r.place<=4?`${PLACE[r.place]} place`:`${PLACE[r.place]} of 8`;
+  const carry=r.place<=4?`${SL[r.carry]} carried the day.`:r.carry==='looks'?'Looks held them back. Looks come from pedigree, so mix for it.':`${SL[r.carry]} held them back. Train it up.`;
+  const extras=[r.handler?'Handler +5':'',r.groom?'Groomed +6':'',`On the day ${r.day>=0?'+':''}${r.day}`].filter(Boolean).join(' · ');
+  openSheet(`<div class="showres"><div class="pupart">${art(p)}</div><div class="ros">${rosette(r.place,s.ev,s.tier)}</div></div>
+    <h2>${head}</h2><div class="sub">${esc(p.name)} · ${tr.name} ${ev.name}</div>
+    <p class="flair">${esc(r.line.replace(/\{n\}/g,p.name))}</p>
+    ${statBars(p.stats,ev.w)}
+    <dl class="summary"><dt>Score</dt><dd>${r.score}</dd><dt>${r.place===1?'Runner-up':'Winning score'}</dt><dd>${r.place===1?'beaten':r.top}</dd><dt>Extras</dt><dd>${extras}</dd></dl>
+    <p class="note" style="margin:0;text-align:center">${carry}</p>
+    <div class="purse">+${r.payout} <span class="cost">${I.coin}</span></div>
+    <button class="btn primary" data-act="collect" data-id="${p.id}">Collect</button>`,'Show results');
+}
+function showAd(){
+  let n=3;
+  openSheet(`<div class="reg" style="text-align:center">Prototype stub</div><div class="adbox"><div class="count" id="adc">3</div><div class="note" style="margin:0">A real build plays an opt-in rewarded ad here.</div></div><div class="btnrow"><button class="btn" data-act="close">Skip</button><button class="btn primary" id="adbtn" data-act="adCollect" disabled>${I.bone}Collect 3 treats</button></div>`,'Rewarded ad');
+  clearInterval(adT);adT=setInterval(()=>{n--;const c=$('adc');if(!c){clearInterval(adT);return}c.textContent=Math.max(n,0);if(n<=0){clearInterval(adT);$('adbtn').disabled=false;$('adbtn').focus()}},1000);
+}
+let resetArm=0,loadArm=0;
+function showSettings(){
+  const s=state.stats;
+  openSheet(`<h2>Settings</h2>
+    <label class="setrow" for="setAsk"><span>Name every new mutt breed<small>Off: mutts get an automatic name you can change later.</small></span><input type="checkbox" id="setAsk" ${state.settings.askMutt?'checked':''}></label>
+    <label class="setrow" for="setHats"><span>Preview party hats<small>Testing only. Real hats appear on birthdays and gotcha days.</small></span><input type="checkbox" id="setHats" ${ui.hats?'checked':''}></label>
+    <label class="setrow" for="setSound"><span>Sound effects<small>Short chimes for mixes, ribbons, and coins.</small></span><input type="checkbox" id="setSound" ${state.settings.sound!==false?'checked':''}></label>
+    <button class="btn" data-act="tipsAgain">Show tips again</button>
+    <h3 style="font-size:20px">Move your kennel</h3>
+    <p class="note" style="margin:-6px 0 0">Your kennel is saved in this browser only. Copy a save code here, then paste it into Mix-a-Pup anywhere else to bring every pup along.</p>
+    <div class="field"><label for="saveCode">Save code</label><textarea id="saveCode" rows="3" autocomplete="off" spellcheck="false" placeholder="Paste a save code here to load it"></textarea></div>
+    <div class="btnrow"><button class="btn" data-act="saveCopy">Copy my save code</button><button class="btn" data-act="saveLoad">Load pasted code</button></div>
+    <h3 style="font-size:20px">Playtest stats</h3>
+    <p class="note" style="margin:-6px 0 0">Saved on this device only. The question: do players come back on their own?</p>
+    <dl class="statlist"><dt>Days played</dt><dd>${s.days.length}</dd><dt>Sessions</dt><dd>${s.sessions}</dd><dt>Mixes</dt><dd>${s.mixes}</dd><dt>Shows entered</dt><dd>${s.shows}</dd><dt>Purses won</dt><dd>${s.purses}</dd><dt>Pupdex</dt><dd>${Object.keys(state.dex).length} / ${DEX.length}</dd><dt>Mutts found</dt><dd>${state.mutts}</dd><dt>Rehomed</dt><dd>${s.rehomes}</dd><dt>Ad stubs watched</dt><dd>${s.ads}</dd><dt>First played</dt><dd>${new Date(s.started).toLocaleDateString()}</dd></dl>
+    <div class="btnrow"><button class="btn" data-act="reset">Reset prototype</button><button class="btn primary" data-act="close">Done</button></div>`,'Settings');
+}
+
+/* ---------- Actions ---------- */
+function act(a,el){
+  const now=Date.now();
+  switch(a){
+    case'tab':ui.tab=el.dataset.tab;ui.sel=[];render();window.scrollTo(0,0);placeCoach();break;
+    case'sel':{const id=+el.dataset.id,i=ui.sel.indexOf(id);if(i>=0)ui.sel.splice(i,1);else{ui.sel.push(id);if(ui.sel.length>2)ui.sel.shift()}renderKennel();renderTray();placeCoach();break}
+    case'mix':{const[a1,b1]=ui.sel.map(pupById);
+      if(!a1||!b1||state.treats<MIX_COST||state.pups.length>=state.kennelCap||busy(a1)||busy(b1))return;
+      if(state.treats>=CAP)state.treatsAt=now;state.treats-=MIX_COST;
+      const p=mixResult(a1,b1),isNew=addPup(state,p,'birthday');state.stats.mixes++;state.tut.done=true;ui.sel=[];save();render();showResult(a1,b1,p,isNew);
+      bump('mix');if(isNew)bump('fresh');save();setTimeout(()=>{sfx(isNew?'fresh':'mix');if(isNew)confetti()},850);break}
+    case'rehome':{const p=pupById(ui.sel[0]);if(!p||busy(p)||state.pups.length<=2)return;rehome(p);break}
+    case'rehomeNew':{const p=pupById(lastNew);closeSheet();if(p&&state.pups.length>2)rehome(p);else toast('Keep at least two pups so you can still mix.');break}
+    case'profile':{const p=pupById(el.dataset.id);if(p){ui.ptab='profile';showProfile(p)}break}
+    case'ptab':{const p=pupById(el.dataset.id);if(p){ui.ptab=el.dataset.v;showProfile(p)}break}
+    case'train':{const p=pupById(ui.sel[0]);if(!p||busy(p)||training().length>=state.yardCap)return;showTrain(p);break}
+    case'trainGo':{const p=pupById(ui.sel[0]);if(!p||busy(p)||training().length>=state.yardCap){closeSheet();return}
+      p.trainCourse=el.dataset.c;p.trainUntil=now+trainMs(p);save();closeSheet();toast(`${p.name} started ${COURSES[p.trainCourse].name.toLowerCase()}.`);render();break}
+    case'enter':{const p=pupById(ui.sel[0]);if(!p||busy(p))return;showEntry(p);break}
+    case'eSet':{ui.entry[el.dataset.k]=el.dataset.v;if(ui.entry.ev!=='conf')ui.entry.groom=false;openSheet(entryHTML(),'Show entry',true);break}
+    case'enterGo':{const e=ui.entry,p=e&&pupById(e.pid);if(!p||busy(p)||!eligible(p,e.ev))return;const tr=TIERS[e.tier],isConf=e.ev==='conf';
+      const cost=tr.fee+(e.handler?tr.handler:0)+(e.groom&&isConf?tr.groom:0);if(state.coins<cost)return;
+      state.coins-=cost;p.show={ev:e.ev,tier:e.tier,until:now+tr.ms,ready:false,res:runShow(p,e.ev,e.tier,e.handler,e.groom&&isConf)};state.stats.shows++;
+      ui.sel=[];save();closeSheet();toast(`${p.name} is off to the ${tr.name.toLowerCase()} ${EVENTS[e.ev].name.toLowerCase()} show. Back in ${mins(tr.ms)}.`);bump('show');save();render();break}
+    case'results':{const p=pupById(el.dataset.id);if(p&&p.show&&p.show.ready)showShowResult(p);break}
+    case'collect':{const p=pupById(el.dataset.id);if(!p||!p.show||!p.show.ready)return;const r=p.show.res,ev=EVENTS[p.show.ev];
+      state.coins+=r.payout;state.stats.purses+=r.payout;const k=Math.min(r.place,5);p.ribbons[k]=(p.ribbons[k]||0)+1;
+      let exp='';if(Math.random()<.5){const main=Object.keys(ev.w).filter(x=>x!=='looks').sort((x,y)=>ev.w[y]-ev.w[x])[0];p.stats[main]=Math.min(99,p.stats[main]+1);exp=` Ring experience: ${SL[main]} +1.`}
+      if(r.place<=4){p.case=p.case||{};const ck=p.show.ev+'|'+p.show.tier+'|'+r.place;p.case[ck]=(p.case[ck]||0)+1}
+      p.history=p.history||[];p.history.unshift({t:now,ev:p.show.ev,tier:p.show.tier,place:r.place,score:r.score,payout:r.payout,line:r.line.replace(/\{n\}/g,p.name)});if(p.history.length>50)p.history.length=50;
+      p.show=null;ui.sel=[];save();closeSheet();sfx('coin');toast(`+${r.payout} coins.${exp}`);if(r.place<=4)bump('ribbon');save();render();break}
+    case'expand':{const c=expandCost();if(state.coins<c||state.kennelCap>=KENNEL_MAX)return;state.coins-=c;state.kennelCap+=2;state.kennelBuys++;save();toast(`Two new runs built. Room for ${state.kennelCap} pups.`);render();break}
+    case'buy':{const o=state.offers[+el.dataset.i],c=o&&offerCost(o);if(!o||o.sold||state.coins<c||state.pups.length>=state.kennelCap)return;
+      state.coins-=c;o.sold=true;const p=JSON.parse(JSON.stringify(o.pup));delete p.id;const nw=addPup(state,p,'gotcha');toast(`${p.name} the ${p.label} is home! Gotcha day: ${md(p.date)}.`);bump('adopt');if(nw)bump('fresh');save();render();break}
+    case'refresh':{const free=now-state.offersAt>=OFFER_MS;if(!free){if(state.coins<REFRESH_COST)return;state.coins-=REFRESH_COST}else state.offersAt=now;rollOffers(state);save();render();break}
+    case'yardup':{const c=yardCost();if(state.coins<c||state.yardCap>=YARD_MAX)return;state.coins-=c;state.yardCap++;save();render();break}
+    case'dex':ui.dexSel=el.dataset.key;renderDex();placeCoach();window.scrollTo({top:0,behavior:'smooth'});break;
+    case'ad':showAd();break;
+    case'adCollect':state.treats=Math.min(state.treats+3,CAP+10);state.stats.ads++;save();closeSheet();toast('+3 treats');render();break;
+    case'settings':showSettings();break;
+    case'tipsAgain':state.hints={};save();closeSheet();toast('Tips will show again as you visit each tab.');break;
+    case'tutskip':state.tut.done=true;save();placeCoach();break;
+    case'hintok':state.hints[el.dataset.k]=true;save();placeCoach();break;
+    case'reset':{if(now-resetArm<4000){try{localStorage.removeItem(KEY)}catch(e){}state=newGame();state.stats.sessions=1;state.stats.days=[today()];state.lastParty=today();svgCache.clear();ui={tab:'kennel',sel:[],dexSel:null,hats:false,entry:null};save();closeSheet();render();toast('Fresh kennel. Five pups are waiting.')}
+      else{resetArm=now;el.textContent='Tap again to wipe everything'}break}
+    case'buyItem':{const it=ITEM[el.dataset.id];if(!it||state.owned[it.id]||state.coins<it.price)return;state.coins-=it.price;state.owned[it.id]=true;save();toast(`${it.name} is yours. Dress a pup from its profile.`);render();break}
+    case'wear':{const p=pupById(el.dataset.id);if(!p)return;p.wear=p.wear||{};p.wear[el.dataset.slot]=el.dataset.v||null;save();ui.ptab='wardrobe';showProfile(p);break}
+    case'goals':showGoals();break;
+    case'claim':{const g=state.goals.list[+el.dataset.i];if(!g||g.claimed||g.p<g.n)return;
+      const n=claimStreak();state.streak={n,day:today()};
+      const c=Math.round(g.coins*(1+streakPct(n)/100));g.claimed=true;state.coins+=c;let msg=`+${c} coins`;
+      if(state.goals.list.every(x=>x.claimed)){state.treats=Math.min(state.treats+3,CAP+10);msg+=' and 3 bonus treats for clearing the board'}
+      sfx('coin');save();showGoals();renderStatus();toast(msg+'.');break}
+    case'claimDex':{if(!dexReady())return;state.dexClaim=(state.dexClaim||0)+1;state.coins+=DEX_PRIZE;sfx('coin');save();showGoals();renderStatus();
+      toast(`+${DEX_PRIZE} coins for ${state.dexClaim*DEX_STEP} Pupdex entries.`);break}
+    case'sort':{const ks=Object.keys(SORTS);state.settings.sort=ks[(ks.indexOf(sortMode())+1)%ks.length];save();renderKennel();placeCoach();break}
+    case'undo':{const u=undoData;undoData=null;$('toast').hidden=true;if(!u)return;
+      if(state.coins<u.v){toast('Those coins are already spent.');return}
+      if(state.pups.length>=state.kennelCap){toast('No room left in the kennel.');return}
+      state.coins-=u.v;state.pups.splice(Math.min(u.i,state.pups.length),0,u.p);state.stats.rehomes--;bump('rehome',-1);save();toast(`${u.p.name} is back home.`);render();break}
+    case'saveCopy':{const code=btoa(unescape(encodeURIComponent(JSON.stringify(state)))),ta=$('saveCode');ta.value=code;ta.focus();ta.select();
+      (navigator.clipboard?navigator.clipboard.writeText(code):Promise.reject()).then(()=>toast('Save code copied.'),()=>toast('The code is in the box. Copy it from there.'));break}
+    case'saveLoad':{let s=null;try{s=JSON.parse(decodeURIComponent(escape(atob($('saveCode').value.replace(/\s+/g,'')))))}catch(e){}
+      if(!s||s.v!==1||!Array.isArray(s.pups)||s.pups.length<2||!s.dex||!s.stats||!s.nextId){toast('That doesn’t look like a Mix-a-Pup save code.');return}
+      if(now-loadArm>5000){loadArm=now;el.textContent='Tap again to replace this kennel';return}
+      loadArm=0;state=migrate(s);svgCache.clear();ui={tab:'kennel',sel:[],dexSel:null,hats:false,entry:null};save();closeSheet();render();toast(`Kennel loaded. ${state.pups.length} pups are home.`);break}
+    case'close':closeSheet();break;
+  }
+}
+let undoData=null;
+function rehome(p){const v=valueOf(p),i=state.pups.indexOf(p);state.coins+=v;state.pups.splice(i,1);ui.sel=[];state.stats.rehomes++;undoData={p,i,v};sfx('coin');
+  toast(`${p.name} has found their furever home! +${v} coins`,true);bump('rehome');save();render()}
+document.addEventListener('click',e=>{
+  if(e.target.id==='overlay'){closeSheet();return}
+  const el=e.target.closest('[data-act]');if(el&&!el.disabled)act(el.dataset.act,el);
+});
+document.addEventListener('submit',e=>{
+  e.preventDefault();const f=e.target,p=pupById(f.dataset.id);
+  if(p){const n=f.querySelector('#rnName'),b=f.querySelector('#rnBreed');
+    if(n){const v=n.value.trim().slice(0,16);if(v)p.name=v}
+    if(b){const v=b.value.trim().slice(0,24);if(v)p.label=v}
+    save()}
+  closeSheet();render();
+});
+document.addEventListener('change',e=>{
+  const id=e.target.id;
+  if(id==='setAsk'){state.settings.askMutt=e.target.checked;save()}
+  if(id==='setHats'){ui.hats=e.target.checked;render()}
+  if(id==='setSound'){state.settings.sound=e.target.checked;save();sfx('coin')}
+  if((id==='eHandler'||id==='eGroom')&&ui.entry){ui.entry[id==='eHandler'?'handler':'groom']=e.target.checked;openSheet(entryHTML(),'Show entry',true)}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('overlay').hidden)closeSheet()});
+
+/* ---------- Clock ---------- */
+function tick(){
+  const now=Date.now();let changed=false;
+  if(state.treats>=CAP)state.treatsAt=now;
+  else{const g=Math.floor((now-state.treatsAt)/REGEN);if(g>0){state.treats=Math.min(CAP,state.treats+g);state.treatsAt+=g*REGEN;if(state.treats>=CAP)state.treatsAt=now;changed=true}}
+  state.pups.forEach(p=>{
+    if(p.trainUntil&&now>=p.trainUntil){finishTraining(p);changed=true}
+    if(p.show&&!p.show.ready&&now>=p.show.until){p.show.ready=true;changed=true;toast(`${p.name} is back from the show. Results are in!`)}
+  });
+  if(state.lastParty!==today()){party();changed=true}
+  if(rollGoals(state))changed=true;
+  if(changed){save();if($('overlay').hidden)render();else{renderStatus();renderTabs()}}
+  else{renderStatus();updateCountdowns()}
+}
+
+/* ---------- Boot ---------- */
+let ticker;
+function start(data){
+  const fromHot=data&&data.state;
+  state=migrate(fromHot?data.state:(load()||newGame()));
+  if(!fromHot){state.stats.sessions++;const d=today();if(!state.stats.days.includes(d))state.stats.days.push(d);save()}
+  render();tick();clearInterval(ticker);ticker=setInterval(tick,1000);
+}
+window.claude?.hot?.snapshot?.(()=>({state}));
+window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});
+</script>
+<script>
+if('serviceWorker' in navigator&&location.protocol==='https:'){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
+</script>
+</body>
+</html>
